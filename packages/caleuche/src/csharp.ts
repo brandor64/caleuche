@@ -18,7 +18,6 @@ export function valueOrEnvironment(
   } else if (value) {
     return `const string ${variableName} = "${value}";`;
   } else {
-    console.error("No value provided for variable or environment variable.");
-    process.exit(1);
+    throw new Error("No value provided for variable or environment variable.");
   }
 }

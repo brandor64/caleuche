@@ -35,8 +35,7 @@ export function valueOrEnvironment(
   indentationLevel: number = 1,
 ): string {
   if (!variableName) {
-    console.error("Variable name must be provided.");
-    process.exit(1);
+    throw new Error("Variable name must be provided.");
   }
   const indent = "\t".repeat(indentationLevel);
 
@@ -51,7 +50,6 @@ export function valueOrEnvironment(
   } else if (value) {
     return `const ${variableName} = "${value}"`;
   } else {
-    console.error("No value provided for variable or environment variable.");
-    process.exit(1);
+    throw new Error("No value provided for variable or environment variable.");
   }
 }

@@ -23,6 +23,12 @@ export type TemplateInput =
       type: "boolean";
       required: boolean;
       default?: boolean;
+    }
+  | {
+      name: string;
+      type: "object";
+      required: boolean;
+      default?: Record<string, any>;
     };
 
 export interface Sample {
@@ -30,4 +36,15 @@ export interface Sample {
   type: Language;
   dependencies: Dependency[];
   input: TemplateInput[];
+}
+
+export interface CompileOptions {
+  project: boolean;
+}
+
+export interface CompileOutput {
+  items: Array<{
+    fileName: string;
+    content: string;
+  }>;
 }

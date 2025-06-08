@@ -1,12 +1,22 @@
 {
   "name": "caleuche",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "dist/types/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "build:clean": "rimraf dist && tsc",
-    "build:clean:watch": "rimraf dist && tsc --watch",
+    "build": "rollup -c",
+    "build:watch": "rollup -c -w",
+    "build:clean": "rimraf dist && rollup -c",
+    "build:clean:watch": "rimraf dist && rollup -c -w",
+    "clean": "rimraf dist",
     "format": "prettier --write .",
     "prepare": "npm run build"
   },
@@ -14,15 +24,17 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "commander": "^14.0.0",
     "lodash": "^4.17.21",
-    "yaml": "^2.8.0"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/lodash": "^4.17.17",
-    "@types/node": "^22.15.30",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
+    "rollup": "^4.42.0",
     "typescript": "^5.8.3"
   },
   "files": [
@@ -33,7 +45,5 @@
     "./project-templates/requirements.txt.template",
     "./project-templates/Sample.csproj.template"
   ],
-  "bin": {
-    "che": "./dist/index.js"
-  }
+  "bin": {}
 }
