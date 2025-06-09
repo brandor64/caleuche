@@ -1,0 +1,31 @@
+{
+  "name": "caleuche-cli",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "bin": {
+    "che": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:clean": "rimraf dist && tsc",
+    "build:clean:watch": "rimraf dist && tsc --watch",
+    "clean": "rimraf dist",
+    "format": "prettier --write .",
+    "prepare": "npm run build"
+  },
+  "author": "",
+  "license": "MIT",
+  "description": "Caleuche CLI",
+  "dependencies": {
+    "caleuche": "file:../caleuche",
+    "commander": "^14.0.0",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}
