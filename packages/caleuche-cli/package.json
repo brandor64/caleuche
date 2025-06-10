@@ -28,6 +28,9 @@
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
   },
-  "repository": "github:brandor64/caleuche",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brandor64/caleuche"
+  },
   "homepage": "https://github.com/brandor64/caleuche#readme"
 }
