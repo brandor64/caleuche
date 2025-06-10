@@ -1,7 +1,7 @@
 import { parse as parseYaml } from "yaml";
 import fs from "fs";
 import path from "path";
-import { Sample } from "caleuche";
+import { Sample } from "@caleuche/core";
 
 export function parse<T>(filePath: string): T | null {
   try {

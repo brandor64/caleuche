@@ -1,9 +1,9 @@
-name: Publish caleuche package to npmjs
+name: Publish caleuche packages to npmjs
 on:
   release:
     types: [published]
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -14,7 +14,23 @@ jobs:
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm publish --provenance --access public
+      
+      # Build and publish @caleuche/core
+      - name: Install dependencies for @caleuche/core
+        run: cd packages/caleuche && npm ci
+      - name: Build @caleuche/core
+        run: cd packages/caleuche && npm run build
+      - name: Publish @caleuche/core
+        run: cd packages/caleuche && npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      # Build and publish @caleuche/cli
+      - name: Install dependencies for @caleuche/cli
+        run: cd packages/caleuche-cli && npm ci
+      - name: Build @caleuche/cli
+        run: cd packages/caleuche-cli && npm run build
+      - name: Publish @caleuche/cli
+        run: cd packages/caleuche-cli && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import { compileSample, Sample } from "caleuche";
+import { compileSample, Sample } from "@caleuche/core";
 import fs from "fs";
 import path from "path";
 import {
