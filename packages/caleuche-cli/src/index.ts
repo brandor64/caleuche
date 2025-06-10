@@ -13,7 +13,7 @@ import {
 } from "./utils";
 
 program
-  .name("caleuche-cli")
+  .name("@caleuche/cli")
   .description("Caleuche CLI for compiling samples")
   .version("1.0.0");
 
