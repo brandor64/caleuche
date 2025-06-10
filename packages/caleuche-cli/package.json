@@ -1,9 +1,9 @@
 {
-  "name": "caleuche-cli",
+  "name": "@caleuche/cli",
   "version": "1.0.0",
   "main": "dist/index.js",
   "bin": {
-    "che": "./dist/index.js"
+    "che": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -27,5 +27,7 @@
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
-  }
+  },
+  "repository": "github:brandor64/caleuche",
+  "homepage": "https://github.com/brandor64/caleuche#readme"
 }
