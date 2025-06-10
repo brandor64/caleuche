@@ -1,0 +1,169 @@
+{
+  "name": "caleuche-vscode",
+  "displayName": "caleuche-vscode",
+  "description": "VS Code extension for Caleuche template files with syntax highlighting and sample preview.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "caleuche-template-csharp",
+        "aliases": [
+          "Caleuche C# Template"
+        ],
+        "extensions": [
+          ".cs.template",
+          ".cs.tmpl"
+        ]
+      },
+      {
+        "id": "caleuche-template-go",
+        "aliases": [
+          "Caleuche Go Template"
+        ],
+        "extensions": [
+          ".go.template",
+          ".go.tmpl"
+        ]
+      },
+      {
+        "id": "caleuche-template-js",
+        "aliases": [
+          "Caleuche JavaScript Template"
+        ],
+        "extensions": [
+          ".js.template",
+          ".js.tmpl"
+        ]
+      },
+      {
+        "id": "caleuche-template-python",
+        "aliases": [
+          "Caleuche Python Template"
+        ],
+        "extensions": [
+          ".py.template",
+          ".py.tmpl"
+        ]
+      },
+      {
+        "id": "caleuche-template-java",
+        "aliases": [
+          "Caleuche Java Template"
+        ],
+        "extensions": [
+          ".java.template",
+          ".java.tmpl"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "caleuche-template-csharp",
+        "scopeName": "source.caleuche.cs",
+        "path": "./syntaxes/csharp.tmLanguage.json"
+      },
+      {
+        "language": "caleuche-template-go",
+        "scopeName": "source.caleuche.go",
+        "path": "./syntaxes/go.tmLanguage.json"
+      },
+      {
+        "language": "caleuche-template-js",
+        "scopeName": "source.caleuche.js",
+        "path": "./syntaxes/js.tmLanguage.json"
+      },
+      {
+        "language": "caleuche-template-python",
+        "scopeName": "source.caleuche.py",
+        "path": "./syntaxes/py.tmLanguage.json"
+      },
+      {
+        "language": "caleuche-template-java",
+        "scopeName": "source.caleuche.java",
+        "path": "./syntaxes/java.tmLanguage.json"
+      },
+      {
+        "path": "./syntaxes/injection.json",
+        "scopeName": "caleuche.template-blocks",
+        "injectTo": [
+          "source.cs",
+          "source.caleuche.cs",
+          "source.go",
+          "source.caleuche.go",
+          "source.js",
+          "source.caleuche.js",
+          "source.python",
+          "source.caleuche.py",
+          "source.java",
+          "source.caleuche.java"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "caleuche-vscode.helloWorld",
+        "title": "Caleuche: Hello World"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Caleuche Language Server Configuration",
+      "properties": {
+        "caleuche.maxNumberOfProblems": {
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "scope": "punctuation.definition.template.begin.caleuche, punctuation.definition.template.end.caleuche",
+            "settings": {
+              "foreground": "#569cd6",
+              "fontStyle": "bold"
+            }
+          },
+          {
+            "scope": "comment.block.template.caleuche, comment.block.template.expression.caleuche",
+            "settings": {
+              "foreground": "#6A9955",
+              "fontStyle": "italic"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.100.0",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}

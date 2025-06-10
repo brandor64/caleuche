@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "scopeName": "caleuche.template-blocks",
+  "injectionSelector": "L:source.cs, L:source.caleuche.cs, L:source.java, L:source.caleuche.java, L:source.go, L:source.caleuche.go, L:source.js, L:source.caleuche.js, L:source.python, L:source.caleuche.python",
+  "patterns": [
+    {
+      "include": "#template-blocks"
+    }
+  ],
+  "repository": {
+    "template-blocks": {
+      "patterns": [
+        {
+          "name": "comment.block.template.expression.caleuche",
+          "begin": "<%=",
+          "end": "%>",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.template.begin.caleuche"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.template.end.caleuche"
+            }
+          }
+        },
+        {
+          "name": "comment.block.template.caleuche",
+          "begin": "<%",
+          "end": "%>",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.template.begin.caleuche"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.template.end.caleuche"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
