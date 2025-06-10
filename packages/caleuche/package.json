@@ -1,6 +1,6 @@
 {
-  "name": "caleuche",
-  "version": "1.0.0",
+  "name": "@caleuche/core",
+  "version": "0.1.2",
   "main": "dist/index.cjs.js",
   "exports": {
     ".": {
@@ -23,6 +23,10 @@
   "author": "",
   "license": "MIT",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brandor64/caleuche"
+  },
   "dependencies": {
     "lodash": "^4.17.21",
     "tslib": "^2.8.1"

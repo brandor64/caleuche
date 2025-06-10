@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import { compileSample, Sample } from "caleuche";
+import { compileSample, Sample } from "@caleuche/core";
 import fs from "fs";
 import path from "path";
 import {
@@ -13,7 +13,7 @@ import {
 } from "./utils";
 
 program
-  .name("caleuche-cli")
+  .name("@caleuche/cli")
   .description("Caleuche CLI for compiling samples")
   .version("1.0.0");
 
