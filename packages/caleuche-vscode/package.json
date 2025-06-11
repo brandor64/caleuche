@@ -1,7 +1,10 @@
 {
   "name": "caleuche-vscode",
+  "publisher": "caleuche",
   "displayName": "caleuche-vscode",
   "description": "VS Code extension for Caleuche template files with syntax highlighting and sample preview.",
+  "repository": "https://github.com/brandor64/caleuche",
+  "license": "MIT",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.100.0"
