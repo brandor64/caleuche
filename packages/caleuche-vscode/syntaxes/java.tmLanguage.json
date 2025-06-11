@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "scopeName": "source.caleuche.java",
+  "patterns": [
+    {
+      "include": "source.java"
+    }
+  ]
+}
