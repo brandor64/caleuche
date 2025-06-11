@@ -5,7 +5,7 @@ Caleuche CLI is a command-line tool for compiling code samples and generating pr
 ## Installation
 
 ```sh
-npm install caleuche-cli
+npm install @caleuche/cli
 ```
 
 ## Usage
