@@ -109,44 +109,7 @@
           "source.caleuche.java"
         ]
       }
-    ],
-    "commands": [
-      {
-        "command": "caleuche-vscode.helloWorld",
-        "title": "Caleuche: Hello World"
-      }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "Caleuche Language Server Configuration",
-      "properties": {
-        "caleuche.maxNumberOfProblems": {
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        }
-      }
-    },
-    "configurationDefaults": {
-      "editor.tokenColorCustomizations": {
-        "textMateRules": [
-          {
-            "scope": "punctuation.definition.template.begin.caleuche, punctuation.definition.template.end.caleuche",
-            "settings": {
-              "foreground": "#569cd6",
-              "fontStyle": "bold"
-            }
-          },
-          {
-            "scope": "comment.block.template.caleuche, comment.block.template.expression.caleuche",
-            "settings": {
-              "foreground": "#6A9955",
-              "fontStyle": "italic"
-            }
-          }
-        ]
-      }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
