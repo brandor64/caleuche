@@ -12,7 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # This makes Actions fetch all Git history so that Changesets can generate rich changelogs with the commits that made the changes
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
@@ -30,7 +29,6 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          # This expects you to have a script called release which does a build for your packages and calls changeset publish
           publish: npm run release
           title: "Release new versions"
           commit: "Release new versions"
