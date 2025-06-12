@@ -18,7 +18,7 @@
   "license": "MIT",
   "description": "Caleuche CLI",
   "dependencies": {
-    "@caleuche/core": "^0.1.2",
+    "@caleuche/core": "*",
     "commander": "^14.0.0",
     "yaml": "^2.8.0"
   },
