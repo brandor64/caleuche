@@ -97,15 +97,10 @@
         "path": "./syntaxes/injection.json",
         "scopeName": "caleuche.template-blocks",
         "injectTo": [
-          "source.cs",
           "source.caleuche.cs",
-          "source.go",
           "source.caleuche.go",
-          "source.js",
           "source.caleuche.js",
-          "source.python",
           "source.caleuche.py",
-          "source.java",
           "source.caleuche.java"
         ]
       }
