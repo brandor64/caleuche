@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "scopeName": "caleuche.template-blocks",
-  "injectionSelector": "L:source.cs, L:source.caleuche.cs, L:source.java, L:source.caleuche.java, L:source.go, L:source.caleuche.go, L:source.js, L:source.caleuche.js, L:source.python, L:source.caleuche.python",
+  "injectionSelector": "L:source.caleuche.cs, L:source.caleuche.java, L:source.caleuche.go, L:source.caleuche.js, L:source.caleuche.py",
   "patterns": [
     {
       "include": "#template-blocks"

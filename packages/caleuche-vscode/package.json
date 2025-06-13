@@ -5,7 +5,7 @@
   "description": "VS Code extension for Caleuche template files with syntax highlighting and sample preview.",
   "repository": "https://github.com/brandor64/caleuche",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -97,15 +97,10 @@
         "path": "./syntaxes/injection.json",
         "scopeName": "caleuche.template-blocks",
         "injectTo": [
-          "source.cs",
           "source.caleuche.cs",
-          "source.go",
           "source.caleuche.go",
-          "source.js",
           "source.caleuche.js",
-          "source.python",
           "source.caleuche.py",
-          "source.java",
           "source.caleuche.java"
         ]
       }
@@ -114,11 +109,13 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
+    "build": "npm run compile",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "publish": "vsce publish --azure-credential"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
