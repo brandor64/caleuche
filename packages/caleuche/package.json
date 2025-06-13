@@ -17,8 +17,7 @@
     "build:clean": "rimraf dist && rollup -c",
     "build:clean:watch": "rimraf dist && rollup -c -w",
     "clean": "rimraf dist",
-    "format": "prettier --write .",
-    "prepare": "npm run build"
+    "format": "prettier --write ."
   },
   "author": "",
   "license": "MIT",
