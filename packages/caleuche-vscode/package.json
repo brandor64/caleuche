@@ -1,5 +1,6 @@
 {
   "name": "caleuche-vscode",
+  "private": true,
   "publisher": "caleuche",
   "displayName": "caleuche-vscode",
   "description": "VS Code extension for Caleuche template files with syntax highlighting and sample preview.",
