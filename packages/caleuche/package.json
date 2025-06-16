@@ -17,7 +17,8 @@
     "build:clean": "rimraf dist && rollup -c",
     "build:clean:watch": "rimraf dist && rollup -c -w",
     "clean": "rimraf dist",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest run"
   },
   "author": "",
   "license": "MIT",
@@ -38,7 +39,8 @@
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "rollup": "^4.42.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.3"
   },
   "files": [
     "./project-templates/Sample.csproj.template",
