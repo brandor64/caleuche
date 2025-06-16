@@ -29,6 +29,13 @@ export type TemplateInput =
       type: "object";
       required: boolean;
       default?: Record<string, any>;
+    }
+  | {
+      name: string;
+      type: "array";
+      itemsType: "string" | "number" | "boolean" | "object";
+      required: boolean;
+      default?: Array<string | number | boolean | Record<string, any>>;
     };
 
 export interface Sample {
