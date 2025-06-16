@@ -5,12 +5,13 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
-    "clean": "npm run clean --workspaces",
+    "build": "yarn workspaces run build",
+    "clean": "yarn workspaces run clean",
     "format": "prettier --write .",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run build && changeset publish"
+    "release": "yarn workspaces run build && changeset publish",
+    "test": "yarn workspaces run test"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
