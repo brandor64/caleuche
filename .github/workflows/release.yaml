@@ -23,13 +23,13 @@ jobs:
         run: npm ci
 
       - name: Build packages
-        run: npm run build
+        run: yarn run build
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: npm run release
+          publish: yarn run release
           title: "Release new versions"
           commit: "Release new versions"
         env:
