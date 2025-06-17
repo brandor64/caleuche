@@ -11,11 +11,11 @@ const mockCompileSample = vi.mocked(compileSample);
 
 vi.mock("../src/utils");
 import {
-    parse,
-    resolveSampleFile,
-    createOutputDirectory,
-    resolveTemplate,
-    isObject,
+  parse,
+  resolveSampleFile,
+  createOutputDirectory,
+  resolveTemplate,
+  isObject,
 } from "../src/utils";
 const mockParse = vi.mocked(parse);
 const mockResolveSampleFile = vi.mocked(resolveSampleFile);
