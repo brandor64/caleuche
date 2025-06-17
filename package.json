@@ -2,7 +2,9 @@
   "name": "caleuche-monorepo",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/caleuche",
+    "packages/caleuche-cli",
+    "packages/caleuche-vscode"
   ],
   "scripts": {
     "build": "yarn workspaces run build",
