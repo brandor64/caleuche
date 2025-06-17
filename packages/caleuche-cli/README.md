@@ -97,7 +97,6 @@ che compile ./my-sample ./data.yaml ./output
 
 - **Data file**: JSON or YAML with the data to inject into the sample.
 
-
 ## License
 
 MIT
