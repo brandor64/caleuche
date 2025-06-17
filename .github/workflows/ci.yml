@@ -23,6 +23,6 @@ jobs:
           node-version: 20.x
           cache: "yarn"
       - name: Install dependencies
-        run: yarn install --immutable --immutable-cache --check-cache
+        run: yarn
       - name: Run tests
         run: yarn test
