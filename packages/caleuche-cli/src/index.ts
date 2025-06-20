@@ -14,4 +14,8 @@ program
   .option("-p, --project", "Generate project file")
   .action(compile);
 
+program.command("batch <batch-file>").action((batchFile) => {
+  console.log(`Batch compiling samples from ${batchFile}`);
+});
+
 program.parse();
