@@ -1,5 +1,11 @@
 # @caleuche/cli
 
+## 0.2.0
+
+### Minor Changes
+
+- 15ef5f4: Adding batch compile command.
+
 ## 0.1.4
 
 ### Patch Changes
