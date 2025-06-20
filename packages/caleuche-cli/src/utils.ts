@@ -32,7 +32,10 @@ export function createOutputDirectory(outputPath: string) {
   }
 }
 
-export function resolveTemplate(samplePath: string, sample: Sample): string {
+export function resolveTemplate(
+  samplePath: string,
+  sample: Sample,
+): string | null {
   try {
     const templatePath = path.join(samplePath, sample.template);
     if (!fs.existsSync(templatePath)) {
@@ -41,10 +44,28 @@ export function resolveTemplate(samplePath: string, sample: Sample): string {
     return fs.readFileSync(templatePath, "utf-8");
   } catch (error) {
     console.error("Error reading template file.");
-    process.exit(1);
+    return null;
   }
 }
 
 export function isObject(value: any): value is Record<string, any> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function isVariantDefinition(
+  variant: SampleVariant,
+): variant is SampleVariantDefinition {
+  return isObject(variant) && !Array.isArray(variant);
+}
+
+export function isVariantPath(
+  variant: SampleVariant,
+): variant is SampleVariantPath {
+  return typeof variant === "string" && fs.existsSync(variant);
+}
+
+export function isVariantReference(
+  variant: SampleVariant,
+): variant is SampleVariantReference {
+  return typeof variant === "string" && !fs.existsSync(variant);
 }

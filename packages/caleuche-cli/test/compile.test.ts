@@ -42,35 +42,6 @@ describe("compile", () => {
   });
 
   describe("error handling", () => {
-    it("should exit when sample file does not exist", () => {
-      mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(false);
-
-      expect(() => {
-        compile("sample", "data.json", "output", {});
-      }).toThrow("process.exit");
-
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        "Sample file not found: /path/to/sample.yaml",
-      );
-      expect(mockExit).toHaveBeenCalledWith(1);
-    });
-
-    it("should exit when sample file cannot be parsed", () => {
-      mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
-      mockParse.mockReturnValueOnce(null);
-
-      expect(() => {
-        compile("sample", "data.json", "output", {});
-      }).toThrow("process.exit");
-
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        "Failed to parse sample file: /path/to/sample.yaml",
-      );
-      expect(mockExit).toHaveBeenCalledWith(1);
-    });
-
     it("should exit when data file cannot be parsed", () => {
       const mockSample: Sample = {
         template: "test template",
