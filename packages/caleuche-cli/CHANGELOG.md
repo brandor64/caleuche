@@ -1,5 +1,11 @@
 # @caleuche/cli
 
+## 0.2.2
+
+### Patch Changes
+
+- e4e7ca9: Fixing issue with batch compilation.
+
 ## 0.2.1
 
 ### Patch Changes
