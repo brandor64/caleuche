@@ -6,6 +6,7 @@ import {
   parse,
 } from "./utils";
 import { compileAndWriteOutput, resolveAndParseSample } from "./common";
+import path from "path";
 
 function loadVariantDefinition(
   variant: SampleVariantDefinition | SampleVariantPath,
@@ -86,7 +87,11 @@ export function batchCompile(batchFile: string) {
   }
   const samples = bachDefinition.samples;
   for (const sampleDefinition of samples) {
-    const sample = resolveAndParseSample(sampleDefinition.templatePath);
+    const templatePath = path.join(
+      path.dirname(batchFile),
+      sampleDefinition.templatePath,
+    );
+    const sample = resolveAndParseSample(templatePath);
     if (!sample) {
       process.exit(1);
     }
@@ -98,7 +103,7 @@ export function batchCompile(batchFile: string) {
       }
 
       if (
-        !compileAndWriteOutput(sample, resolvedVariant, variant.output, {
+        !compileAndWriteOutput(sample, resolvedVariant.data, variant.output, {
           project: true,
         })
       ) {
