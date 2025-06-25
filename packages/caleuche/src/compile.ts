@@ -3,6 +3,7 @@ import { CompileOptions, CompileOutput, Sample } from "./interfaces";
 import * as csharp from "./csharp";
 import * as go from "./go";
 import * as python from "./python";
+import * as java from "./java";
 
 function fillInputObject(
   sample: Sample,
@@ -127,6 +128,7 @@ export function compileSample(
       csharp: csharp,
       go: go,
       python: python,
+      java: java,
     },
   });
   const targetFileName = getTargetFileName(sample);

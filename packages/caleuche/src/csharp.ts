@@ -14,7 +14,7 @@ export function valueOrEnvironment(
   value?: string,
 ): string {
   if (useEnvironmentVariable && environmentVariable) {
-    return `var ${variableName} = Environment.GetEnvironmentVariable("${environmentVariable}") ?? throw new InvalidOperationException("${environmentVariable} environment variable is not set.")`;
+    return `var ${variableName} = Environment.GetEnvironmentVariable("${environmentVariable}") ?? throw new InvalidOperationException("${environmentVariable} environment variable is not set.");`;
   } else if (value) {
     return `const string ${variableName} = "${value}";`;
   } else {
