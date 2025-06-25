@@ -2,6 +2,7 @@
 
 import { program } from "commander";
 import { compile } from "./compile";
+import { batchCompile } from "./batch";
 import { version } from "../package.json";
 
 program
@@ -14,8 +15,6 @@ program
   .option("-p, --project", "Generate project file")
   .action(compile);
 
-program.command("batch <batch-file>").action((batchFile) => {
-  console.log(`Batch compiling samples from ${batchFile}`);
-});
+program.command("batch <batch-file>").action(batchCompile);
 
 program.parse();
