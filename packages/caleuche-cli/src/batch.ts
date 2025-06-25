@@ -43,22 +43,24 @@ function loadVariantDefinitions(
 }
 
 function resolveVariantDefinition(
-  variant: SampleVariant,
+  variant: SampleVariantConfig,
   variantRegistry: Record<string, SampleVariantDefinition>,
 ): SampleVariantDefinition | null {
-  if (isVariantPath(variant)) {
-    const v = parse<SampleVariantDefinition>(variant);
+  if (isVariantPath(variant.data)) {
+    const v = parse<SampleVariantDefinition>(variant.data);
     if (!v) {
       console.error(`Failed to parse variant at path: ${variant}`);
       return null;
     }
     return v;
-  } else if (isVariantDefinition(variant)) {
-    return variant;
-  } else if (isVariantReference(variant)) {
-    const v = variantRegistry[variant];
+  } else if (isVariantDefinition(variant.data)) {
+    return variant.data;
+  } else if (isVariantReference(variant.data)) {
+    const v = variantRegistry[variant.data];
     if (!v) {
-      console.error(`Variant reference "${variant}" not found in registry.`);
+      console.error(
+        `Variant reference "${variant.data}" not found in registry.`,
+      );
       return null;
     }
     return v;
@@ -82,11 +84,15 @@ export function batchCompile(batchFile: string) {
     process.exit(1);
   }
   const variants = loadVariantDefinitions(bachDefinition.variants);
+  console.log(
+    `Loaded ${Object.keys(variants || {}).length} variant definitions from batch file.`,
+  );
   if (!variants) {
     process.exit(1);
   }
   const samples = bachDefinition.samples;
   for (const sampleDefinition of samples) {
+    console.log(`Processing sample: ${sampleDefinition.templatePath}`);
     const templatePath = path.join(
       path.dirname(batchFile),
       sampleDefinition.templatePath,
@@ -97,13 +103,19 @@ export function batchCompile(batchFile: string) {
     }
 
     for (const variant of sampleDefinition.variants) {
+      console.log("Processing variant...");
       const resolvedVariant = resolveVariantDefinition(variant, variants);
       if (!resolvedVariant) {
         process.exit(1);
       }
 
+      const effectiveOutputPath = path.join(
+        path.dirname(batchFile),
+        variant.output,
+      );
+
       if (
-        !compileAndWriteOutput(sample, resolvedVariant.data, variant.output, {
+        !compileAndWriteOutput(sample, resolvedVariant, effectiveOutputPath, {
           project: true,
         })
       ) {
