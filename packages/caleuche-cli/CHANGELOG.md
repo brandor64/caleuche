@@ -1,5 +1,11 @@
 # @caleuche/cli
 
+## 0.2.3
+
+### Patch Changes
+
+- 0d6214d: Making batch output path relative. Fixing variant references.
+
 ## 0.2.2
 
 ### Patch Changes
