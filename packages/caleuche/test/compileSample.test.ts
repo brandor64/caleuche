@@ -465,7 +465,7 @@ describe("compileSample", () => {
           {
               static void Main()
               {
-                  <%= csharp.valueOrEnvironment(true, "apiKey", "API_KEY") %>;
+                  <%= csharp.valueOrEnvironment(true, "apiKey", "API_KEY") %>
                   Console.WriteLine($"API Key: {apiKey}");
               }
           }`,
@@ -491,6 +491,69 @@ describe("compileSample", () => {
                   Console.WriteLine($"API Key: {apiKey}");
               }
           }`);
+    });
+
+    describe("Java template with helper functions", () => {
+      const sample: Sample = {
+        type: "java",
+        input: [{
+          name: "apiKey",
+          type: "string",
+          required: false,
+          default: "123",
+        }, {
+          name: "useEnvVars",
+          type: "boolean",
+          required: false,
+          default: true,
+        }],
+        template: multiline`
+          import java.util.Map;
+
+          public class Sample {
+              public static void main(String[] args) {
+                  <%= java.valueOrEnvironment(useEnvVars, "apiKey", "API_KEY", apiKey, 2) %>
+                  System.out.println("API Key: " + apiKey);
+              }
+          }`,
+        dependencies: [],
+      };
+      const options: CompileOptions = { project: false };
+      it("should compile Java template with environment variable handling", () => {
+        const output: CompileOutput = compileSample(sample, { useEnvVars: true }, options);
+        const sampleFile = output.items.find(
+          (item) => item.fileName === "Sample.java",
+        );
+        expect(sampleFile!.content).toBe(multiline`
+            import java.util.Map;
+
+            public class Sample {
+                public static void main(String[] args) {
+                    String apiKey = System.getenv("API_KEY");
+                    if (apiKey == null || apiKey.isEmpty()) {
+                        System.out.println("Please set the API_KEY environment variable.");
+                        System.exit(1);
+                    }
+                    System.out.println("API Key: " + apiKey);
+                }
+            }`);
+      });
+
+      it("should compile without environment variable handling", () => {
+        const output: CompileOutput = compileSample(sample, { useEnvVars: false, apiKey: "123" }, options);
+        const sampleFile = output.items.find(
+          (item) => item.fileName === "Sample.java",
+        );
+        expect(sampleFile!.content).toBe(multiline`
+            import java.util.Map;
+
+            public class Sample {
+                public static void main(String[] args) {
+                    String apiKey = "123";
+                    System.out.println("API Key: " + apiKey);
+                }
+            }`);
+      });
     });
   });
 
