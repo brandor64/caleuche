@@ -1,5 +1,11 @@
 # @caleuche/cli
 
+## 0.2.4
+
+### Patch Changes
+
+- 4e1bb52: Fixing paths and file imports for batch yaml file.
+
 ## 0.2.3
 
 ### Patch Changes
