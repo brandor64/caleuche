@@ -1,6 +1,7 @@
 import { compileSample, Sample } from "@caleuche/core";
 import {
   createOutputDirectory,
+  isFile,
   parse,
   resolveSampleFile,
   resolveTemplate,
@@ -10,7 +11,7 @@ import path from "path";
 
 export function resolveAndParseSample(samplePath: string): Sample | null {
   const sampleFilePath = resolveSampleFile(samplePath);
-  if (!fs.existsSync(sampleFilePath)) {
+  if (!isFile(sampleFilePath)) {
     console.error(`Sample file not found: ${sampleFilePath}`);
     return null;
   }

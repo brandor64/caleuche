@@ -58,14 +58,12 @@ export function isVariantDefinition(
   return isObject(variant) && !Array.isArray(variant);
 }
 
-export function isVariantPath(
-  variant: SampleVariant,
-): variant is SampleVariantPath {
-  return typeof variant === "string" && fs.existsSync(variant);
+export function getAbsoluteDirectoryPath(
+  filePath: string,
+): string {
+  return path.dirname(path.resolve(filePath));
 }
 
-export function isVariantReference(
-  variant: SampleVariant,
-): variant is SampleVariantReference {
-  return typeof variant === "string" && !fs.existsSync(variant);
+export function isFile(filePath: string): boolean {
+  return fs.existsSync(filePath) && fs.lstatSync(filePath).isFile();
 }
