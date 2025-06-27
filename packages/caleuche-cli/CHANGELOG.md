@@ -1,5 +1,11 @@
 # @caleuche/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- ff834ac: Changing batch file schema.
+
 ## 0.2.4
 
 ### Patch Changes
