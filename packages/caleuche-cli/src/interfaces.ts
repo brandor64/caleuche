@@ -1,14 +1,26 @@
-type SampleVariantDefinition = Record<string, any>;
-type SampleVariantReference = string;
-type SampleVariantPath = string;
-type SampleVariant =
-  | SampleVariantDefinition
-  | SampleVariantReference
-  | SampleVariantPath;
+interface SampleVariantInputDefinition {
+  type: "object";
+  properties: Record<string, any>;
+}
+
+interface SampleVariantInputReference {
+  type: "reference";
+  value: string;
+}
+
+interface SampleVariantInputPath {
+  type: "path";
+  value: string;
+}
+
+type SampleVariantInput =
+  | SampleVariantInputDefinition
+  | SampleVariantInputReference
+  | SampleVariantInputPath;
 
 interface SampleVariantConfig {
   output: string;
-  data: SampleVariant;
+  input: SampleVariantInput | string;
 }
 
 interface SampleDefinition {
@@ -16,7 +28,12 @@ interface SampleDefinition {
   variants: SampleVariantConfig[];
 }
 
-interface BatchCompileOptions {
-  variants?: Record<string, SampleVariantDefinition | SampleVariantPath>;
+interface SampleVariantInputEntry {
+  name: string;
+  input: SampleVariantInputDefinition | SampleVariantInputPath;
+}
+
+interface BatchCompileDescription {
+  variants?: SampleVariantInputEntry[];
   samples: SampleDefinition[];
 }
