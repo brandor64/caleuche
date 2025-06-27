@@ -52,11 +52,11 @@ variants:
         DEBUG: true
 
 samples:
-  - templatePath: ./project-templates/Sample.csproj.template
+  - templatePath: ./project-templates/Sample.cs.template
     variants:
-      - output: ./out/Sample.csproj
+      - output: ./out-dev/
         input: dev           # Shorthand for reference
-      - output: ./out/Sample.Release.csproj
+      - output: ./out-prod/
         input:
           type: object
           properties:
