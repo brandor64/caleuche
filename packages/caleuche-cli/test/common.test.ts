@@ -6,11 +6,7 @@ import fs from "fs";
 const mockFs = vi.mocked(fs);
 
 vi.mock("../src/utils");
-import {
-  parse,
-  resolveSampleFile,
-  isFile,
-} from "../src/utils";
+import { parse, resolveSampleFile, isFile } from "../src/utils";
 import { resolveAndParseSample } from "../src/common";
 const mockParse = vi.mocked(parse);
 const mockResolveSampleFile = vi.mocked(resolveSampleFile);
