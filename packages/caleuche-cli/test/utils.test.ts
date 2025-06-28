@@ -12,7 +12,7 @@ import {
 } from "../src/utils";
 import { Sample } from "@caleuche/core";
 
-function multiline(strings: TemplateStringsArray, ...values: any[]) {
+export function multiline(strings: TemplateStringsArray, ...values: any[]) {
   let result = strings[0];
   for (let i = 0; i < values.length; i++) {
     result += values[i] + strings[i + 1];

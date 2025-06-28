@@ -42,9 +42,7 @@ function loadVariantDefinitions(
   for (const { name, input } of variants) {
     const v = loadVariantInputDefinition(input, workingDirectory);
     if (!v) {
-      console.error(
-        `Failed to load variant definition for key "${name}": ${input}`,
-      );
+      console.error(`Failed to load variant definition for key "${name}"`);
       return null;
     }
     definitions[name] = v;

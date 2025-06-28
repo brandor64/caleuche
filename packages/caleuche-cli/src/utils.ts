@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { Sample } from "@caleuche/core";
 
+export type Optional<T> = T | undefined;
+
 export function parse<T>(filePath: string): T | null {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
