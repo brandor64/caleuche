@@ -37,7 +37,7 @@ describe("batchCompile", () => {
 
   it("should exit if batch file does not exist", () => {
     expect(() => {
-      batchCompile(getPath("batch.yaml"));
+      batchCompile(getPath("batch.yaml"), {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       `Batch file "${getPath("batch.yaml")}" does not exist or is not a file.`,
@@ -48,7 +48,7 @@ describe("batchCompile", () => {
   it("should exit if batch file is not a file", () => {
     fs.mkdirSync(getPath("batch.yaml"));
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile("batch.yaml", {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       'Batch file "batch.yaml" does not exist or is not a file.',
@@ -65,7 +65,7 @@ describe("batchCompile", () => {
     fs.writeFileSync(batchFilePath, invalidYaml);
 
     expect(() => {
-      batchCompile(batchFilePath);
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       `Failed to parse batch file: ${batchFilePath}`,
@@ -85,7 +85,7 @@ describe("batchCompile", () => {
     fs.writeFileSync(batchFilePath, content);
 
     expect(() => {
-      batchCompile(batchFilePath);
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       `Failed to load variant definition for key "foo"`,
@@ -104,7 +104,7 @@ describe("batchCompile", () => {
     fs.writeFileSync(batchFilePath, content);
 
     expect(() => {
-      batchCompile(batchFilePath);
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       `Sample file not found: ${getPath("sample.yaml")}`,
@@ -136,7 +136,7 @@ describe("batchCompile", () => {
     fs.writeFileSync(sampleFilePath, invalidSampleContent);
 
     expect(() => {
-      batchCompile(batchFilePath);
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       `Failed to parse sample file: ${sampleFilePath}`,
@@ -172,7 +172,7 @@ describe("batchCompile", () => {
     `;
     fs.writeFileSync(sampleFilePath, sampleContent);
     expect(() => {
-      batchCompile(batchFilePath);
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       `Variant "bar" could not be resolved.`,
@@ -211,7 +211,7 @@ describe("batchCompile", () => {
     `;
     fs.writeFileSync(sampleFilePath, sampleContent);
     expect(() => {
-      batchCompile(batchFilePath);
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenNthCalledWith(
       1,
@@ -255,7 +255,7 @@ describe("batchCompile", () => {
     `;
     fs.writeFileSync(sampleFilePath, sampleContent);
     expect(() => {
-      batchCompile(getPath("batch.yaml"));
+      batchCompile(getPath("batch.yaml"), {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       "An unknown error occurred during compilation.",
@@ -296,7 +296,7 @@ describe("batchCompile", () => {
           required: true
     `;
     fs.writeFileSync(sampleFilePath, sampleContent);
-    batchCompile(batchFilePath);
+    batchCompile(batchFilePath, {});
 
     expect(fs.existsSync(getPath("out/file1.js"))).toBe(true);
     expect(fs.readFileSync(getPath("out/file1.js"), "utf-8")).toBe(
@@ -304,6 +304,51 @@ describe("batchCompile", () => {
     );
     expect(fs.existsSync(getPath("out/file2.js"))).toBe(true);
     expect(fs.readFileSync(getPath("out/file2.js"), "utf-8")).toBe(
+      "console.log('2');",
+    );
+  });
+
+  it("should compile and write output files for each variant", () => {
+    mockCompileSample.mockReturnValue({
+      items: [
+        { fileName: "file1.js", content: "console.log('1');" },
+        { fileName: "file2.js", content: "console.log('2');" },
+      ],
+    });
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var2: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: foo
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const sampleContent = multiline`
+      template: sample.js.template
+      type: javascript
+      dependencies:
+      input:
+        - name: var
+          type: string
+          required: true
+    `;
+    fs.writeFileSync(sampleFilePath, sampleContent);
+    batchCompile(batchFilePath, { outputDir: getPath("other") });
+
+    expect(fs.existsSync(getPath("other/out/file1.js"))).toBe(true);
+    expect(fs.readFileSync(getPath("other/out/file1.js"), "utf-8")).toBe(
+      "console.log('1');",
+    );
+    expect(fs.existsSync(getPath("other/out/file2.js"))).toBe(true);
+    expect(fs.readFileSync(getPath("other/out/file2.js"), "utf-8")).toBe(
       "console.log('2');",
     );
   });

@@ -126,7 +126,7 @@ export function batchCompile(batchFile: string, options: { outputDir?: string })
       }
 
       const effectiveOutputPath = path.join(
-        options.outputDir || workingDirectory,
+        options?.outputDir || workingDirectory,
         variant.output);
 
       if (
