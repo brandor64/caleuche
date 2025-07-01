@@ -1,5 +1,12 @@
 # @caleuche/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 566dad9: Updated command help strings.
+- 6215af4: Adding option directory to batch command.
+
 ## 0.3.0
 
 ### Minor Changes
