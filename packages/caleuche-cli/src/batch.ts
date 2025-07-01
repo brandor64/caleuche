@@ -80,7 +80,7 @@ function resolveVariantDefinition(
   }
 }
 
-export function batchCompile(batchFile: string) {
+export function batchCompile(batchFile: string, options: { outputDir?: string }) {
   if (!isFile(batchFile)) {
     console.error(`Batch file "${batchFile}" does not exist or is not a file.`);
     process.exit(1);
@@ -125,10 +125,12 @@ export function batchCompile(batchFile: string) {
         process.exit(1);
       }
 
-      const effectiveOutputPath = path.join(workingDirectory, variant.output);
+      const effectiveOutputPath = path.join(
+        options.outputDir || workingDirectory,
+        variant.output);
 
       if (
-        !compileAndWriteOutput(sample, resolvedVariant, effectiveOutputPath, {
+        !compileAndWriteOutput(sample, resolvedVariant.properties, effectiveOutputPath, {
           project: true,
         })
       ) {
