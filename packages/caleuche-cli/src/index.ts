@@ -21,7 +21,7 @@ program
 program
   .command("batch")
   .argument("<batch-file>", "Path to the batch file")
-  .option("-d, --output-dir", "Output directory for compiled samples")
+  .option("-d, --output-dir <outputDir>", "Output directory for compiled samples")
   .action(batchCompile);
 
 program.parse();
