@@ -6,18 +6,19 @@ import {
   resolveSampleFile,
   resolveTemplate,
 } from "./utils";
+import { logger } from "./logger";
 import fs from "fs";
 import path from "path";
 
 export function resolveAndParseSample(samplePath: string): Sample | null {
   const sampleFilePath = resolveSampleFile(samplePath);
   if (!isFile(sampleFilePath)) {
-    console.error(`Sample file not found: ${sampleFilePath}`);
+    logger.error(`Sample file not found: ${sampleFilePath}`);
     return null;
   }
   const sample = parse<Sample>(sampleFilePath);
   if (!sample) {
-    console.error(`Failed to parse sample file: ${sampleFilePath}`);
+    logger.error(`Failed to parse sample file: ${sampleFilePath}`);
     return null;
   }
   const resolvedTemplate = resolveTemplate(samplePath, sample);
@@ -41,9 +42,9 @@ export function compileAndWriteOutput(
       });
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`Error during compilation: ${error.message}`);
+        logger.error(`Error during compilation: ${error.message}`);
       } else {
-        console.error("An unknown error occurred during compilation.");
+        logger.error("An unknown error occurred during compilation.");
       }
       return null;
     }
@@ -61,7 +62,7 @@ export function compileAndWriteOutput(
       fs.writeFileSync(itemOutputPath, content);
     }
   } catch {
-    console.error(`Failed to write output to ${outputPath}`);
+    logger.error(`Failed to write output to ${outputPath}`);
     return false;
   }
   return true;

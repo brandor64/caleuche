@@ -1,5 +1,6 @@
 import { isObject, parse } from "./utils";
 import { compileAndWriteOutput, resolveAndParseSample } from "./common";
+import { logger } from "./logger";
 
 export function compile(
   samplePath: string,
@@ -14,7 +15,7 @@ export function compile(
 
   const inputData = parse<Record<string, any>>(dataPath);
   if (!inputData || !isObject(inputData)) {
-    console.error(`Failed to parse input data file: ${dataPath}`);
+    logger.error(`Failed to parse input data file: ${dataPath}`);
     process.exit(1);
   }
 

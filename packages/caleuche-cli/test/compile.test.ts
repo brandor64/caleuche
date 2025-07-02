@@ -24,19 +24,20 @@ const mockCreateOutputDirectory = vi.mocked(createOutputDirectory);
 const mockResolveTemplate = vi.mocked(resolveTemplate);
 const mockIsObject = vi.mocked(isObject);
 const mockIsFile = vi.mocked(isFile);
+import { logger } from "../src/logger";
 
 import { compile } from "../src/compile";
 
 describe("compile", () => {
   let mockExit: any;
-  let mockConsoleError: any;
+  let mockLoggerError: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
       throw new Error("process.exit");
     });
-    mockConsoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockLoggerError = vi.spyOn(logger, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -62,7 +63,7 @@ describe("compile", () => {
         compile("sample", "data.json", "output", {});
       }).toThrow("process.exit");
 
-      expect(mockConsoleError).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
         "Failed to parse input data file: data.json",
       );
       expect(mockExit).toHaveBeenCalledWith(1);
@@ -87,7 +88,7 @@ describe("compile", () => {
         compile("sample", "data.json", "output", {});
       }).toThrow("process.exit");
 
-      expect(mockConsoleError).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
         "Failed to parse input data file: data.json",
       );
       expect(mockExit).toHaveBeenCalledWith(1);
@@ -116,7 +117,7 @@ describe("compile", () => {
         compile("sample", "data.json", "output", {});
       }).toThrow("process.exit");
 
-      expect(mockConsoleError).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
         "Error during compilation: Compilation error",
       );
       expect(mockExit).toHaveBeenCalledWith(1);
@@ -145,7 +146,7 @@ describe("compile", () => {
         compile("sample", "data.json", "output", {});
       }).toThrow("process.exit");
 
-      expect(mockConsoleError).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
         "An unknown error occurred during compilation.",
       );
       expect(mockExit).toHaveBeenCalledWith(1);

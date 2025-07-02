@@ -21,6 +21,8 @@
   "dependencies": {
     "@caleuche/core": "^0.2.0",
     "commander": "^14.0.0",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
     "yaml": "^2.8.0"
   },
   "devDependencies": {
