@@ -8,20 +8,21 @@ import { compileSample } from "@caleuche/core";
 const mockCompileSample = vi.mocked(compileSample);
 
 import { batchCompile } from "../src/batch";
+import { logger } from "../src/logger";
 import { Optional } from "../src/utils";
 import { multiline } from "./utils.test";
 
 describe("batchCompile", () => {
   let tempDir: Optional<string>;
   let mockExit: any;
-  let mockConsoleError: any;
+  let mockLoggerError: any;
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "caleuche-cli-test-"));
     mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
       throw new Error("process.exit");
     });
-    mockConsoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockLoggerError = vi.spyOn(logger, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -39,7 +40,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(getPath("batch.yaml"), {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       `Batch file "${getPath("batch.yaml")}" does not exist or is not a file.`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -50,7 +51,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile("batch.yaml", {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       'Batch file "batch.yaml" does not exist or is not a file.',
     );
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -67,7 +68,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       `Failed to parse batch file: ${batchFilePath}`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -87,7 +88,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       `Failed to load variant definition for key "foo"`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -106,7 +107,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       `Sample file not found: ${getPath("sample.yaml")}`,
     );
 
@@ -138,7 +139,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       `Failed to parse sample file: ${sampleFilePath}`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -174,7 +175,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       `Variant "bar" could not be resolved.`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -213,11 +214,11 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenNthCalledWith(
+    expect(mockLoggerError).toHaveBeenNthCalledWith(
       1,
       "Error during compilation: Compilation error",
     );
-    expect(mockConsoleError).toHaveBeenNthCalledWith(
+    expect(mockLoggerError).toHaveBeenNthCalledWith(
       2,
       'Sample: sample.yaml, Variant: {"output":"out","input":"foo"}',
     );
@@ -257,7 +258,7 @@ describe("batchCompile", () => {
     expect(() => {
       batchCompile(getPath("batch.yaml"), {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(mockLoggerError).toHaveBeenCalledWith(
       "An unknown error occurred during compilation.",
     );
     expect(mockExit).toHaveBeenCalledWith(1);

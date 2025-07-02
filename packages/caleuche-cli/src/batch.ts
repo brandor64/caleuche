@@ -7,6 +7,7 @@ import {
   parse,
 } from "./utils";
 import { compileAndWriteOutput, resolveAndParseSample } from "./common";
+import { logger } from "./logger";
 import path from "path";
 
 function loadVariantInputDefinition(
@@ -20,12 +21,12 @@ function loadVariantInputDefinition(
     if (isFile(absolutePath)) {
       const v = parse<SampleVariantInputDefinition>(absolutePath);
       if (!v) {
-        console.error(`Failed to parse variant at path: ${absolutePath}`);
+        logger.error(`Failed to parse variant at path: ${absolutePath}`);
         return null;
       }
       return v;
     } else {
-      console.error(
+      logger.error(
         `Variant input path "${variantInput.value}" does not exist or is not a file.`,
       );
       return null;
@@ -42,7 +43,7 @@ function loadVariantDefinitions(
   for (const { name, input } of variants) {
     const v = loadVariantInputDefinition(input, workingDirectory);
     if (!v) {
-      console.error(`Failed to load variant definition for key "${name}"`);
+      logger.error(`Failed to load variant definition for key "${name}"`);
       return null;
     }
     definitions[name] = v;
@@ -61,7 +62,7 @@ function resolveVariantDefinition(
     if (v) {
       return v;
     }
-    console.error(`Variant "${ref}" could not be resolved.`);
+    logger.error(`Variant "${ref}" could not be resolved.`);
     return null;
   } else if (isVariantInputDefinition(variant.input)) {
     return variant.input;
@@ -73,30 +74,33 @@ function resolveVariantDefinition(
         return v;
       }
     }
-    console.error(
+    logger.error(
       `Variant input path "${variant.input.value}" does not exist or is not a file.`,
     );
     return null;
   }
 }
 
-export function batchCompile(batchFile: string, options: { outputDir?: string }) {
+export function batchCompile(
+  batchFile: string,
+  options: { outputDir?: string },
+) {
   if (!isFile(batchFile)) {
-    console.error(`Batch file "${batchFile}" does not exist or is not a file.`);
+    logger.error(`Batch file "${batchFile}" does not exist or is not a file.`);
     process.exit(1);
   }
   const workingDirectory = getAbsoluteDirectoryPath(batchFile);
-  console.log(`Working directory: ${workingDirectory}`);
+  logger.info(`Working directory: ${workingDirectory}`);
   const batchDefinition = parse<BatchCompileDescription>(batchFile);
   if (!batchDefinition) {
-    console.error(`Failed to parse batch file: ${batchFile}`);
+    logger.error(`Failed to parse batch file: ${batchFile}`);
     process.exit(1);
   }
   const variants = loadVariantDefinitions(
     batchDefinition.variants,
     workingDirectory,
   );
-  console.log(
+  logger.info(
     `Loaded ${Object.keys(variants || {}).length} variant definitions from batch file.`,
   );
   if (!variants) {
@@ -104,7 +108,7 @@ export function batchCompile(batchFile: string, options: { outputDir?: string })
   }
   const samples = batchDefinition.samples;
   for (const sampleDefinition of samples) {
-    console.log(`Processing sample: ${sampleDefinition.templatePath}`);
+    logger.info(`Processing sample: ${sampleDefinition.templatePath}`);
     const templatePath = path.join(
       workingDirectory,
       sampleDefinition.templatePath,
@@ -115,7 +119,7 @@ export function batchCompile(batchFile: string, options: { outputDir?: string })
     }
 
     for (const variant of sampleDefinition.variants) {
-      console.log("Processing variant...");
+      logger.info("Processing variant...");
       const resolvedVariant = resolveVariantDefinition(
         variant,
         variants,
@@ -127,14 +131,20 @@ export function batchCompile(batchFile: string, options: { outputDir?: string })
 
       const effectiveOutputPath = path.join(
         options?.outputDir || workingDirectory,
-        variant.output);
+        variant.output,
+      );
 
       if (
-        !compileAndWriteOutput(sample, resolvedVariant.properties, effectiveOutputPath, {
-          project: true,
-        })
+        !compileAndWriteOutput(
+          sample,
+          resolvedVariant.properties,
+          effectiveOutputPath,
+          {
+            project: true,
+          },
+        )
       ) {
-        console.error(
+        logger.error(
           `Sample: ${sampleDefinition.templatePath}, Variant: ${JSON.stringify(variant)}`,
         );
         process.exit(1);

@@ -2,6 +2,7 @@ import { parse as parseYaml } from "yaml";
 import fs from "fs";
 import path from "path";
 import { Sample } from "@caleuche/core";
+import { logger } from "./logger";
 
 export type Optional<T> = T | undefined;
 
@@ -45,7 +46,7 @@ export function resolveTemplate(
     }
     return fs.readFileSync(templatePath, "utf-8");
   } catch (error) {
-    console.error("Error reading template file.");
+    logger.error("Error reading template file.");
     return null;
   }
 }

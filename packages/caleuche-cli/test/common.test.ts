@@ -12,15 +12,15 @@ const mockParse = vi.mocked(parse);
 const mockResolveSampleFile = vi.mocked(resolveSampleFile);
 const mockIsFile = vi.mocked(isFile);
 
+import { logger } from "../src/logger";
+
 describe("common", () => {
   describe("resolveAndParseSample", () => {
-    let mockConsoleError: any;
+    let mockLoggerError: any;
 
     beforeEach(() => {
       vi.clearAllMocks();
-      mockConsoleError = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      mockLoggerError = vi.spyOn(logger, "error").mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -33,7 +33,7 @@ describe("common", () => {
 
       const sample = resolveAndParseSample("sample");
       expect(sample).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
         "Sample file not found: /path/to/sample.yaml",
       );
     });
@@ -45,7 +45,7 @@ describe("common", () => {
 
       const sample = resolveAndParseSample("sample");
       expect(sample).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
         "Failed to parse sample file: /path/to/sample.yaml",
       );
     });
