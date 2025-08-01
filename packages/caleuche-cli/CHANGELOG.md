@@ -1,5 +1,24 @@
 # @caleuche/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 566dad9: Updated command help strings.
+- 6215af4: Adding option directory to batch command.
+
+## 0.3.0
+
+### Minor Changes
+
+- ff834ac: Changing batch file schema.
+
+## 0.2.4
+
+### Patch Changes
+
+- 4e1bb52: Fixing paths and file imports for batch yaml file.
+
 ## 0.2.3
 
 ### Patch Changes

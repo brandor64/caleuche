@@ -1,40 +1,23 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import path from "path";
-
-vi.mock("fs");
 import fs from "fs";
-const mockFs = vi.mocked(fs);
+import path from "path";
+import os from "os";
 
 vi.mock("@caleuche/core");
-import { compileSample, Sample } from "@caleuche/core";
+import { compileSample } from "@caleuche/core";
 const mockCompileSample = vi.mocked(compileSample);
 
-vi.mock("../src/utils");
-import {
-  parse,
-  resolveSampleFile,
-  createOutputDirectory,
-  resolveTemplate,
-  isVariantDefinition,
-  isVariantPath,
-  isVariantReference,
-} from "../src/utils";
-const mockParse = vi.mocked(parse);
-const mockResolveSampleFile = vi.mocked(resolveSampleFile);
-const mockCreateOutputDirectory = vi.mocked(createOutputDirectory);
-const mockResolveTemplate = vi.mocked(resolveTemplate);
-const mockIsVariantDefinition = vi.mocked(isVariantDefinition);
-const mockIsVariantPath = vi.mocked(isVariantPath);
-const mockIsVariantReference = vi.mocked(isVariantReference);
-
 import { batchCompile } from "../src/batch";
+import { Optional } from "../src/utils";
+import { multiline } from "./utils.test";
 
 describe("batchCompile", () => {
+  let tempDir: Optional<string>;
   let mockExit: any;
   let mockConsoleError: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "caleuche-cli-test-"));
     mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
       throw new Error("process.exit");
     });
@@ -42,153 +25,193 @@ describe("batchCompile", () => {
   });
 
   afterEach(() => {
+    if (tempDir) {
+      fs.rmSync(tempDir, { recursive: true });
+    }
     vi.restoreAllMocks();
   });
 
+  function getPath(relative: string): string {
+    return path.join(tempDir!, relative);
+  }
+
   it("should exit if batch file does not exist", () => {
-    mockFs.existsSync.mockReturnValue(false);
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(getPath("batch.yaml"), {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
-      'Batch file "batch.yaml" does not exist.',
+      `Batch file "${getPath("batch.yaml")}" does not exist or is not a file.`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if batch file is not a file", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => false } as any);
+    fs.mkdirSync(getPath("batch.yaml"));
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile("batch.yaml", {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
-      '"batch.yaml" is not a file.',
+      'Batch file "batch.yaml" does not exist or is not a file.',
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if batch file cannot be parsed", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse.mockReturnValueOnce(null);
+    const batchFilePath = getPath("batch.yaml");
+    const invalidYaml = multiline`
+      invalid: yaml: structure:
+        broken
+    `;
+    fs.writeFileSync(batchFilePath, invalidYaml);
+
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
-      "Failed to parse batch file: batch.yaml",
+      `Failed to parse batch file: ${batchFilePath}`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if variant definitions cannot be loaded", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse
-      .mockImplementationOnce(() => ({
-        variants: { foo: "badvariant.yaml" },
-        samples: [],
-      }))
-      .mockImplementationOnce(() => null);
+    const batchFilePath = getPath("batch.yaml");
+    const content = multiline`
+      variants:
+        - name: foo
+          input:
+            type: path
+            value: badvariant.yaml
+    `;
+    fs.writeFileSync(batchFilePath, content);
+
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
-      `Failed to load variant definition for key "foo": badvariant.yaml`,
+      `Failed to load variant definition for key "foo"`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if sample file not found", () => {
-    mockFs.existsSync.mockReturnValueOnce(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse.mockReturnValueOnce({
-      variants: {},
-      samples: [{ templatePath: "sample.yaml", variants: [], output: "out" }],
-    });
-    mockResolveSampleFile.mockReturnValue("sample.yaml");
-    mockFs.existsSync.mockReturnValueOnce(false);
+    const batchFilePath = getPath("batch.yaml");
+    const content = multiline`
+      samples:
+        - templatePath: sample.yaml
+          variants: []
+          output: out
+    `;
+    fs.writeFileSync(batchFilePath, content);
+
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
-      "Sample file not found: sample.yaml",
+      `Sample file not found: ${getPath("sample.yaml")}`,
     );
+
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if sample file cannot be parsed", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse.mockReturnValueOnce({
-      variants: {},
-      samples: [
-        { templatePath: "sample.yaml", variants: ["v1"], output: "out" },
-      ],
-    });
-    mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-    mockParse.mockReturnValueOnce(null);
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: foo
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const invalidSampleContent = multiline`
+      some: invalid: yaml
+    `;
+    fs.writeFileSync(sampleFilePath, invalidSampleContent);
+
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
-      "Failed to parse sample file: /path/to/sample.yaml",
+      `Failed to parse sample file: ${sampleFilePath}`,
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if variant cannot be resolved", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse.mockReturnValueOnce({
-      variants: {},
-      samples: [
-        { templatePath: "sample.yaml", variants: ["v1"], output: "out" },
-      ],
-    });
-    mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-    mockParse.mockReturnValueOnce({
-      template: "t",
-      type: "js",
-      dependencies: [],
-      input: [],
-    });
-    mockResolveTemplate.mockReturnValue("resolved template");
-    // variant resolution fails
-    mockIsVariantPath.mockReturnValue(false);
-    mockIsVariantDefinition.mockReturnValue(false);
-    mockIsVariantReference.mockReturnValue(false);
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: bar
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const sampleContent = multiline`
+      template: sample.js.template
+      type: javascript
+      dependencies:
+      input:
+        - name: var
+          type: string
+          required: true
+    `;
+    fs.writeFileSync(sampleFilePath, sampleContent);
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
-    expect(mockConsoleError).toHaveBeenCalledWith('Invalid variant type: "v1"');
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      `Variant "bar" could not be resolved.`,
+    );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if compilation throws error", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse.mockReturnValueOnce({
-      variants: {},
-      samples: [
-        { templatePath: "sample.yaml", variants: ["v1"], output: "out" },
-      ],
-    });
-    mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-    mockParse.mockReturnValueOnce({
-      template: "t",
-      type: "js",
-      dependencies: [],
-      input: [],
-    });
-    mockResolveTemplate.mockReturnValue("resolved template");
-    mockIsVariantPath.mockReturnValue(false);
-    mockIsVariantDefinition.mockReturnValue(true);
     mockCompileSample.mockImplementation(() => {
       throw new Error("Compilation error");
     });
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var2: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: foo
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const sampleContent = multiline`
+      template: sample.js.template
+      type: javascript
+      dependencies:
+      input:
+        - name: var
+          type: string
+          required: true
+    `;
+    fs.writeFileSync(sampleFilePath, sampleContent);
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(batchFilePath, {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenNthCalledWith(
       1,
@@ -196,37 +219,43 @@ describe("batchCompile", () => {
     );
     expect(mockConsoleError).toHaveBeenNthCalledWith(
       2,
-      'Sample: sample.yaml, Variant: "v1"',
+      'Sample: sample.yaml, Variant: {"output":"out","input":"foo"}',
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
   it("should exit if compilation throws unknown error", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse.mockReturnValueOnce({
-      variants: {},
-      samples: [
-        { templatePath: "sample.yaml", variants: ["v1"], output: "out" },
-      ],
-    });
-    mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-    mockParse.mockReturnValueOnce({
-      template: "t",
-      type: "js",
-      dependencies: [],
-      input: [],
-    });
-    mockResolveTemplate.mockReturnValue("resolved template");
-    // variant resolution
-    mockIsVariantPath.mockReturnValue(false);
-    mockIsVariantDefinition.mockReturnValue(true);
-    // compileSample throws unknown error
     mockCompileSample.mockImplementation(() => {
       throw "Unknown error";
     });
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var2: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: foo
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const sampleContent = multiline`
+      template: sample.js.template
+      type: javascript
+      dependencies:
+      input:
+        - name: var
+          type: string
+          required: true
+    `;
+    fs.writeFileSync(sampleFilePath, sampleContent);
     expect(() => {
-      batchCompile("batch.yaml");
+      batchCompile(getPath("batch.yaml"), {});
     }).toThrow("process.exit");
     expect(mockConsoleError).toHaveBeenCalledWith(
       "An unknown error occurred during compilation.",
@@ -235,50 +264,91 @@ describe("batchCompile", () => {
   });
 
   it("should compile and write output files for each variant", () => {
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.lstatSync.mockReturnValue({ isFile: () => true } as any);
-    mockParse.mockReturnValueOnce({
-      variants: {},
-      samples: [
-        {
-          templatePath: "sample.yaml",
-          variants: [
-            { output: "v1.output", foo: "bar" },
-            { output: "v2.output", foo: "baz" },
-          ],
-          output: "out",
-        },
-      ],
-    });
-    mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-    mockParse.mockReturnValueOnce({
-      template: "t",
-      type: "js",
-      dependencies: [],
-      input: [],
-    });
-    mockResolveTemplate.mockReturnValue("resolved template");
-    // variant resolution
-    mockIsVariantPath.mockReturnValue(false);
-    mockIsVariantDefinition.mockReturnValue(true);
-    // compileSample returns output
     mockCompileSample.mockReturnValue({
       items: [
         { fileName: "file1.js", content: "console.log('1');" },
         { fileName: "file2.js", content: "console.log('2');" },
       ],
     });
-    mockCreateOutputDirectory.mockImplementation(() => {});
-    mockFs.writeFileSync.mockImplementation(() => {});
-    batchCompile("batch.yaml");
-    expect(mockCreateOutputDirectory).toHaveBeenCalledWith("v1.output");
-    expect(mockCreateOutputDirectory).toHaveBeenCalledWith("v2.output");
-    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      path.join("v1.output", "file1.js"),
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var2: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: foo
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const sampleContent = multiline`
+      template: sample.js.template
+      type: javascript
+      dependencies:
+      input:
+        - name: var
+          type: string
+          required: true
+    `;
+    fs.writeFileSync(sampleFilePath, sampleContent);
+    batchCompile(batchFilePath, {});
+
+    expect(fs.existsSync(getPath("out/file1.js"))).toBe(true);
+    expect(fs.readFileSync(getPath("out/file1.js"), "utf-8")).toBe(
       "console.log('1');",
     );
-    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      path.join("v1.output", "file2.js"),
+    expect(fs.existsSync(getPath("out/file2.js"))).toBe(true);
+    expect(fs.readFileSync(getPath("out/file2.js"), "utf-8")).toBe(
+      "console.log('2');",
+    );
+  });
+
+  it("should compile and write output files for each variant", () => {
+    mockCompileSample.mockReturnValue({
+      items: [
+        { fileName: "file1.js", content: "console.log('1');" },
+        { fileName: "file2.js", content: "console.log('2');" },
+      ],
+    });
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var2: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: foo
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const sampleContent = multiline`
+      template: sample.js.template
+      type: javascript
+      dependencies:
+      input:
+        - name: var
+          type: string
+          required: true
+    `;
+    fs.writeFileSync(sampleFilePath, sampleContent);
+    batchCompile(batchFilePath, { outputDir: getPath("other") });
+
+    expect(fs.existsSync(getPath("other/out/file1.js"))).toBe(true);
+    expect(fs.readFileSync(getPath("other/out/file1.js"), "utf-8")).toBe(
+      "console.log('1');",
+    );
+    expect(fs.existsSync(getPath("other/out/file2.js"))).toBe(true);
+    expect(fs.readFileSync(getPath("other/out/file2.js"), "utf-8")).toBe(
       "console.log('2');",
     );
   });

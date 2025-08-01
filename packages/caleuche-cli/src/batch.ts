@@ -1,100 +1,112 @@
-import fs from "fs";
 import {
-  isVariantDefinition,
-  isVariantPath,
-  isVariantReference,
+  getAbsoluteDirectoryPath,
+  getVariantInputReferenceValue,
+  isFile,
+  isVariantInputDefinition,
+  isVariantInputReference,
   parse,
 } from "./utils";
 import { compileAndWriteOutput, resolveAndParseSample } from "./common";
 import path from "path";
 
-function loadVariantDefinition(
-  variant: SampleVariantDefinition | SampleVariantPath,
-): SampleVariantDefinition | null {
-  if (isVariantDefinition(variant)) {
-    return variant;
-  } else if (isVariantPath(variant)) {
-    const v = parse<SampleVariantDefinition>(variant);
-    if (!v) {
-      console.error(`Failed to parse variant at path: ${variant}`);
-      return null;
-    }
-    return v;
-  }
-  return null;
-}
-
-function loadVariantDefinitions(
-  variants?: Record<string, SampleVariantDefinition | SampleVariantPath>,
-): Record<string, SampleVariantDefinition> | null {
-  if (!variants) return {};
-  const definitions: Record<string, SampleVariantDefinition> = {};
-  for (const [key, variant] of Object.entries(variants)) {
-    const v = loadVariantDefinition(variant);
-    if (!v) {
+function loadVariantInputDefinition(
+  variantInput: SampleVariantInputDefinition | SampleVariantInputPath,
+  workingDirectory: string,
+): SampleVariantInputDefinition | null {
+  if (isVariantInputDefinition(variantInput)) {
+    return variantInput;
+  } else {
+    const absolutePath = path.join(workingDirectory, variantInput.value);
+    if (isFile(absolutePath)) {
+      const v = parse<SampleVariantInputDefinition>(absolutePath);
+      if (!v) {
+        console.error(`Failed to parse variant at path: ${absolutePath}`);
+        return null;
+      }
+      return v;
+    } else {
       console.error(
-        `Failed to load variant definition for key "${key}": ${variant}`,
+        `Variant input path "${variantInput.value}" does not exist or is not a file.`,
       );
       return null;
     }
-    definitions[key] = v;
+  }
+}
+
+function loadVariantDefinitions(
+  variants: SampleVariantInputEntry[] | undefined,
+  workingDirectory: string,
+): Record<string, SampleVariantInputDefinition> | null {
+  if (!variants) return {};
+  const definitions: Record<string, SampleVariantInputDefinition> = {};
+  for (const { name, input } of variants) {
+    const v = loadVariantInputDefinition(input, workingDirectory);
+    if (!v) {
+      console.error(`Failed to load variant definition for key "${name}"`);
+      return null;
+    }
+    definitions[name] = v;
   }
   return definitions;
 }
 
 function resolveVariantDefinition(
   variant: SampleVariantConfig,
-  variantRegistry: Record<string, SampleVariantDefinition>,
-): SampleVariantDefinition | null {
-  if (isVariantPath(variant.data)) {
-    const v = parse<SampleVariantDefinition>(variant.data);
-    if (!v) {
-      console.error(`Failed to parse variant at path: ${variant}`);
-      return null;
+  variantRegistry: Record<string, SampleVariantInputDefinition>,
+  workingDirectory: string,
+): SampleVariantInputDefinition | null {
+  if (isVariantInputReference(variant.input)) {
+    const ref = getVariantInputReferenceValue(variant.input);
+    const v = variantRegistry[ref];
+    if (v) {
+      return v;
     }
-    return v;
-  } else if (isVariantDefinition(variant.data)) {
-    return variant.data;
-  } else if (isVariantReference(variant.data)) {
-    const v = variantRegistry[variant.data];
-    if (!v) {
-      console.error(
-        `Variant reference "${variant.data}" not found in registry.`,
-      );
-      return null;
+    console.error(`Variant "${ref}" could not be resolved.`);
+    return null;
+  } else if (isVariantInputDefinition(variant.input)) {
+    return variant.input;
+  } else {
+    const absolutePath = path.join(workingDirectory, variant.input.value);
+    if (isFile(absolutePath)) {
+      const v = parse<SampleVariantInputDefinition>(absolutePath);
+      if (v) {
+        return v;
+      }
     }
-    return v;
+    console.error(
+      `Variant input path "${variant.input.value}" does not exist or is not a file.`,
+    );
+    return null;
   }
-  console.error(`Invalid variant type: ${JSON.stringify(variant)}`);
-  return null;
 }
 
-export function batchCompile(batchFile: string) {
-  if (!fs.existsSync(batchFile)) {
-    console.error(`Batch file "${batchFile}" does not exist.`);
+export function batchCompile(batchFile: string, options: { outputDir?: string }) {
+  if (!isFile(batchFile)) {
+    console.error(`Batch file "${batchFile}" does not exist or is not a file.`);
     process.exit(1);
   }
-  if (!fs.lstatSync(batchFile).isFile()) {
-    console.error(`"${batchFile}" is not a file.`);
-    process.exit(1);
-  }
-  const bachDefinition = parse<BatchCompileOptions>(batchFile);
-  if (!bachDefinition) {
+  const workingDirectory = getAbsoluteDirectoryPath(batchFile);
+  console.log(`Working directory: ${workingDirectory}`);
+  const batchDefinition = parse<BatchCompileDescription>(batchFile);
+  if (!batchDefinition) {
     console.error(`Failed to parse batch file: ${batchFile}`);
     process.exit(1);
   }
-  const variants = loadVariantDefinitions(bachDefinition.variants);
+  const variants = loadVariantDefinitions(
+    batchDefinition.variants,
+    workingDirectory,
+  );
   console.log(
     `Loaded ${Object.keys(variants || {}).length} variant definitions from batch file.`,
   );
   if (!variants) {
     process.exit(1);
   }
-  const samples = bachDefinition.samples;
+  const samples = batchDefinition.samples;
   for (const sampleDefinition of samples) {
     console.log(`Processing sample: ${sampleDefinition.templatePath}`);
     const templatePath = path.join(
-      path.dirname(batchFile),
+      workingDirectory,
       sampleDefinition.templatePath,
     );
     const sample = resolveAndParseSample(templatePath);
@@ -104,18 +116,21 @@ export function batchCompile(batchFile: string) {
 
     for (const variant of sampleDefinition.variants) {
       console.log("Processing variant...");
-      const resolvedVariant = resolveVariantDefinition(variant, variants);
+      const resolvedVariant = resolveVariantDefinition(
+        variant,
+        variants,
+        workingDirectory,
+      );
       if (!resolvedVariant) {
         process.exit(1);
       }
 
       const effectiveOutputPath = path.join(
-        path.dirname(batchFile),
-        variant.output,
-      );
+        options?.outputDir || workingDirectory,
+        variant.output);
 
       if (
-        !compileAndWriteOutput(sample, resolvedVariant, effectiveOutputPath, {
+        !compileAndWriteOutput(sample, resolvedVariant.properties, effectiveOutputPath, {
           project: true,
         })
       ) {

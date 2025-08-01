@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { Sample } from "@caleuche/core";
 
+export type Optional<T> = T | undefined;
+
 export function parse<T>(filePath: string): T | null {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
@@ -52,20 +54,40 @@ export function isObject(value: any): value is Record<string, any> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-export function isVariantDefinition(
-  variant: SampleVariant,
-): variant is SampleVariantDefinition {
-  return isObject(variant) && !Array.isArray(variant);
+export function isVariantInputDefinition(
+  variant: SampleVariantInput,
+): variant is SampleVariantInputDefinition {
+  return isObject(variant) && variant.type === "object";
 }
 
-export function isVariantPath(
-  variant: SampleVariant,
-): variant is SampleVariantPath {
-  return typeof variant === "string" && fs.existsSync(variant);
+export function isVariantInputPath(
+  variant: SampleVariantInput,
+): variant is SampleVariantInputPath {
+  return isObject(variant) && variant.type === "path";
 }
 
-export function isVariantReference(
-  variant: SampleVariant,
-): variant is SampleVariantReference {
-  return typeof variant === "string" && !fs.existsSync(variant);
+export function isVariantInputReference(
+  variant: SampleVariantInput | string,
+): variant is SampleVariantInputReference | string {
+  return (
+    (isObject(variant) && variant.type === "reference") ||
+    typeof variant === "string"
+  );
+}
+
+export function getVariantInputReferenceValue(
+  variant: SampleVariantInputReference | string,
+): string {
+  if (typeof variant === "string") {
+    return variant;
+  }
+  return variant.value;
+}
+
+export function getAbsoluteDirectoryPath(filePath: string): string {
+  return path.dirname(path.resolve(filePath));
+}
+
+export function isFile(filePath: string): boolean {
+  return fs.existsSync(filePath) && fs.lstatSync(filePath).isFile();
 }

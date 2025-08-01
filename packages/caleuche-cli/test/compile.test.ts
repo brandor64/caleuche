@@ -16,12 +16,14 @@ import {
   createOutputDirectory,
   resolveTemplate,
   isObject,
+  isFile,
 } from "../src/utils";
 const mockParse = vi.mocked(parse);
 const mockResolveSampleFile = vi.mocked(resolveSampleFile);
 const mockCreateOutputDirectory = vi.mocked(createOutputDirectory);
 const mockResolveTemplate = vi.mocked(resolveTemplate);
 const mockIsObject = vi.mocked(isObject);
+const mockIsFile = vi.mocked(isFile);
 
 import { compile } from "../src/compile";
 
@@ -51,7 +53,7 @@ describe("compile", () => {
       };
 
       mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
+      mockIsFile.mockReturnValue(true);
       mockParse.mockReturnValueOnce(mockSample);
       mockResolveTemplate.mockReturnValue("resolved template");
       mockParse.mockReturnValueOnce(null);
@@ -75,7 +77,7 @@ describe("compile", () => {
       };
 
       mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
+      mockIsFile.mockReturnValue(true);
       mockParse.mockReturnValueOnce(mockSample);
       mockResolveTemplate.mockReturnValue("resolved template");
       mockParse.mockReturnValueOnce("not an object");
@@ -101,7 +103,7 @@ describe("compile", () => {
       const mockData = { name: "test" };
 
       mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
+      mockIsFile.mockReturnValue(true);
       mockParse.mockReturnValueOnce(mockSample);
       mockResolveTemplate.mockReturnValue("resolved template");
       mockParse.mockReturnValueOnce(mockData);
@@ -130,7 +132,7 @@ describe("compile", () => {
       const mockData = { name: "test" };
 
       mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
+      mockIsFile.mockReturnValue(true);
       mockParse.mockReturnValueOnce(mockSample);
       mockResolveTemplate.mockReturnValue("resolved template");
       mockParse.mockReturnValueOnce(mockData);
@@ -167,7 +169,7 @@ describe("compile", () => {
       };
 
       mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
+      mockIsFile.mockReturnValue(true);
       mockParse.mockReturnValueOnce(mockSample);
       mockResolveTemplate.mockReturnValue("resolved template");
       mockParse.mockReturnValueOnce(mockData);
@@ -203,7 +205,7 @@ describe("compile", () => {
       };
 
       mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
+      mockIsFile.mockReturnValue(true);
       mockParse.mockReturnValueOnce(mockSample);
       mockResolveTemplate.mockReturnValue("resolved template");
       mockParse.mockReturnValueOnce(mockData);
@@ -234,7 +236,7 @@ describe("compile", () => {
       };
 
       mockResolveSampleFile.mockReturnValue("/path/to/sample.yaml");
-      mockFs.existsSync.mockReturnValue(true);
+      mockIsFile.mockReturnValue(true);
       mockParse.mockReturnValueOnce(mockSample);
       mockResolveTemplate.mockReturnValue("resolved template");
       mockParse.mockReturnValueOnce(mockData);
