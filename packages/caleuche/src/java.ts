@@ -21,6 +21,11 @@ export function valueOrEnvironment(
   } else if (value) {
     return `String ${variableName} = "${value}";`;
   } else {
+    if (variableName.trim() !== "") {
+      throw new Error(`No value provided for variable \"${variableName}\" or environment variable.`);
+    } else if (environmentVariable.trim() !== "") {
+      throw new Error(`No value provided for environment variable \"${environmentVariable}\".`);
+    }
     throw new Error("No value provided for variable or environment variable.");
   }
 }
