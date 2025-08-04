@@ -22,7 +22,8 @@ export function valueOrEnvironment(
       throw new Error(`No value provided for variable \"${variableName}\" or environment variable.`);
     } else if (environmentVariable.trim() !== "") {
       throw new Error(`No value provided for environment variable \"${environmentVariable}\".`);
+    } else {
+      throw new Error("No value provided for variable or environment variable.");
     }
-    throw new Error("No value provided for variable or environment variable.");
   }
 }
