@@ -1,3 +1,5 @@
+import { formatError } from "./common";
+
 export type Include = string | { module: string; condition?: boolean };
 
 export function includes(...items: Include[]): string {
@@ -50,6 +52,6 @@ export function valueOrEnvironment(
   } else if (value) {
     return `const ${variableName} = "${value}"`;
   } else {
-    throw new Error("No value provided for variable or environment variable.");
+    throw formatError(variableName, environmentVariable);
   }
 }

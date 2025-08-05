@@ -1,3 +1,5 @@
+import { formatError } from "./common";
+
 export function valueOrEnvironment(
   useEnvironmentVariable: boolean,
   variableName: string,
@@ -18,6 +20,6 @@ export function valueOrEnvironment(
   } else if (value) {
     return `${variableName} = "${value}"`;
   } else {
-    throw new Error("No value provided for variable or environment variable.");
+    throw formatError(variableName, environmentVariable);
   }
 }
