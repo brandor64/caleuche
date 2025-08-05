@@ -1,5 +1,20 @@
 import * as vscode from 'vscode';
-import { escapeHtml, escapeAttribute } from './htmlUtils';
+
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function escapeAttribute(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 export class TemplateInputViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'caleucheTemplateInputs';

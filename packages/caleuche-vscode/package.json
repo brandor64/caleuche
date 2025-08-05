@@ -6,7 +6,7 @@
   "description": "VS Code extension for Caleuche template files with syntax highlighting and sample preview.",
   "repository": "https://github.com/brandor64/caleuche",
   "license": "MIT",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -144,16 +144,16 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn run package",
-    "build": "yarn run check-types && yarn run lint && node esbuild.js",
+    "vscode:prepublish": "yarn package",
+    "build": "yarn run check-types && yarn lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "clean": "rimraf dist",
-    "package": "yarn run check-types && yarn run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
+    "package": "yarn run check-types && yarn lint && node esbuild.js --production",
+    "build-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "pretest": "yarn build-tests && yarn build && yarn lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
     "format": "prettier --write .",
@@ -163,7 +163,6 @@
   },
   "dependencies": {
     "@caleuche/core": "^0.2.0",
-    "shiki": "^3.9.2",
     "yaml": "^2.8.0"
   },
   "devDependencies": {
