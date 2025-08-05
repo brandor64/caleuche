@@ -496,17 +496,20 @@ describe("compileSample", () => {
     describe("Java template with helper functions", () => {
       const sample: Sample = {
         type: "java",
-        input: [{
-          name: "apiKey",
-          type: "string",
-          required: false,
-          default: "123",
-        }, {
-          name: "useEnvVars",
-          type: "boolean",
-          required: false,
-          default: true,
-        }],
+        input: [
+          {
+            name: "apiKey",
+            type: "string",
+            required: false,
+            default: "123",
+          },
+          {
+            name: "useEnvVars",
+            type: "boolean",
+            required: false,
+            default: true,
+          },
+        ],
         template: multiline`
           import java.util.Map;
 
@@ -520,7 +523,11 @@ describe("compileSample", () => {
       };
       const options: CompileOptions = { project: false };
       it("should compile Java template with environment variable handling", () => {
-        const output: CompileOutput = compileSample(sample, { useEnvVars: true }, options);
+        const output: CompileOutput = compileSample(
+          sample,
+          { useEnvVars: true },
+          options,
+        );
         const sampleFile = output.items.find(
           (item) => item.fileName === "Sample.java",
         );
@@ -540,7 +547,11 @@ describe("compileSample", () => {
       });
 
       it("should compile without environment variable handling", () => {
-        const output: CompileOutput = compileSample(sample, { useEnvVars: false, apiKey: "123" }, options);
+        const output: CompileOutput = compileSample(
+          sample,
+          { useEnvVars: false, apiKey: "123" },
+          options,
+        );
         const sampleFile = output.items.find(
           (item) => item.fileName === "Sample.java",
         );
