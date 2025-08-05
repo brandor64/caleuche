@@ -159,7 +159,7 @@
     "format": "prettier --write .",
     "vsce:build": "vsce package",
     "vsce:publish": "vsce publish --azure-credential",
-    "test": "vscode-test"
+    "test": "echo \"No tests are defined\""
   },
   "dependencies": {
     "@caleuche/core": "^0.2.0",
