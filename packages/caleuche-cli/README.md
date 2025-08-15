@@ -18,6 +18,20 @@ che compile <sample-directory|sample-file> <data-file> <output-directory> [optio
 - `<data-file>`: Path to the data file (JSON or YAML).
 - `<output-directory>`: Directory where the generated project will be placed.
 
+## running locally
+
+From the dev container, run 
+
+```bash
+yarn
+```
+
+And then:
+
+```bash
+npx che .... # your inputs
+```
+
 ### Options
 
 - `-p, --project` Generate project file (e.g., csproj, go.mod, etc.)

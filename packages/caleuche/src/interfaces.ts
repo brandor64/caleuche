@@ -41,6 +41,7 @@ export type TemplateInput =
 export interface Sample {
   template: string;
   type: Language;
+  buildSystem?: string;
   dependencies: Dependency[];
   input: TemplateInput[];
 }
