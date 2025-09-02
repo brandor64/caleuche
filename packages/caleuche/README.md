@@ -40,6 +40,19 @@ const output: CompileOutput = compileSample(sample, { name: "World" }, options);
 // output.items will contain the generated files
 ```
 
+### Template Built-ins
+
+For use in authoring templates. All functions described below are ingested by Caleuche when compiling code files.
+
+#### Universal
+
+- `<language>.valueOrEnvironment(useEnvironmentVariable: boolean, variableName: string, environmentVariable: string, value: string)` Generates code to assign a variable from a specified environment variable `environmentVariable` at runtime or from a provided value `value`.
+
+#### Language Specific
+- `go.includes(...items: string | {module: string; condition?: boolean})` Generates go import statement from list of dependencies. Exclude a dependency by setting condition to false.
+
+- `csharp.usings(...items: string | {namespace: string; condition?: boolean})` Generates C# using statements from a list of namespaces. Exclude a namespace by setting condition to false.
+
 ## API
 
 ### Types
