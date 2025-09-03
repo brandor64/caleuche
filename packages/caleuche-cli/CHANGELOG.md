@@ -1,5 +1,13 @@
 # @caleuche/cli
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [1dd1a48]
+- Updated dependencies [6254997]
+  - @caleuche/core@0.3.0
+
 ## 0.4.0
 
 ### Minor Changes
