@@ -34,6 +34,7 @@ function preprocessTemplate(template: string): string {
   return template.replace(regex, "$1");
 }
 
+import buildGradle from "../project-templates/build.gradle.template";
 import csproj from "../project-templates/Sample.csproj.template";
 import gomod from "../project-templates/go.mod.template";
 import packageJson from "../project-templates/package.json.template";
@@ -62,10 +63,17 @@ function getProjectFileTemplate(sample: Sample): {
         template: preprocessTemplate(packageJson),
       };
     case "java":
-      return {
-        targetFileName: `pom.xml`,
-        template: preprocessTemplate(pomXml),
-      };
+      if (sample.buildSystem === "gradle") {
+        return {
+          targetFileName: `build.gradle`,
+          template: preprocessTemplate(buildGradle),
+        };
+      } else {
+        return {
+          targetFileName: `pom.xml`,
+          template: preprocessTemplate(pomXml),
+        };
+      }
     case "python":
       return {
         targetFileName: `requirements.txt`,
