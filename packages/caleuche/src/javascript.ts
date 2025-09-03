@@ -10,14 +10,14 @@ export function valueOrEnvironment(
   if (!variableName) {
     throw new Error("Variable name must be provided.");
   }
-  const indent = "\t".repeat(indentationLevel);
+  const indent = "  ".repeat(indentationLevel);
 
   if (useEnvironmentVariable && environmentVariable) {
     return (
       `const ${variableName} = process.env["${environmentVariable}"];\n` +
       `${indent}if (!${variableName}) {\n` +
-      `${indent}\tconsole.error("Please set the ${environmentVariable} environment variable.");\n` +
-      `${indent}\tprocess.exit(1);\n` +
+      `${indent}  console.error("Please set the ${environmentVariable} environment variable.");\n` +
+      `${indent}  process.exit(1);\n` +
       `${indent}}`
     );
   } else if (value) {
