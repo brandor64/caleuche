@@ -493,6 +493,31 @@ describe("compileSample", () => {
           }`);
     });
 
+    it("should handle complex Javascript template with helper functions", () => {
+      const sample: Sample = {
+        template: multiline`
+          <%= javascript.valueOrEnvironment(true, "api_key", "API_KEY", "123", 0) %>
+          console.log("API Key: " + api_key);`,
+        type: "javascript",
+        dependencies: [],
+        input: [],
+      };
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(sample, {}, options);
+
+      const sampleFile = output.items.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(sampleFile!.content).toBe(multiline`
+          const api_key = process.env["API_KEY"];
+          if (!api_key) {
+            console.error("Please set the API_KEY environment variable.");
+            process.exit(1);
+          }
+          console.log("API Key: " + api_key);
+      `);
+    });
+
     describe("Java template with helper functions", () => {
       const sample: Sample = {
         type: "java",

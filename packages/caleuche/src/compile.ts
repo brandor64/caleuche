@@ -4,6 +4,7 @@ import * as csharp from "./csharp";
 import * as go from "./go";
 import * as python from "./python";
 import * as java from "./java";
+import * as javascript from "./javascript";
 
 function fillInputObject(
   sample: Sample,
@@ -129,6 +130,7 @@ export function compileSample(
       go: go,
       python: python,
       java: java,
+      javascript: javascript,
     },
   });
   const targetFileName = getTargetFileName(sample);
