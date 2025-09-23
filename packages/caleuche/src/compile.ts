@@ -90,6 +90,17 @@ function generateProjectFile(sample: Sample) {
   };
 }
 
+function generateTagsFile(sample: Sample) {
+  const tags = sample.tags || {};
+  const content = Object.entries(tags)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join("\n");
+  return {
+    fileName: "tags.yaml",
+    content: content,
+  };
+}
+
 function getTargetFileName(sample: Sample): string {
   const language = sample.type;
   switch (language) {
@@ -119,6 +130,11 @@ export function compileSample(
   if (options.project) {
     const projectFile = generateProjectFile(sample);
     output.items.push(projectFile);
+  }
+
+  if (sample.tags) {
+    const tagsFile = generateTagsFile(sample);
+    output.items.push(tagsFile);
   }
 
   const inputObject = fillInputObject(sample, input);

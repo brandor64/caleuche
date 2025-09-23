@@ -362,6 +362,59 @@ describe("compileSample", () => {
     });
   });
 
+  describe("Tag File Generation", () => {
+    it("should generate tags.yaml when one tag is provided", () => {
+      const sample: Sample = {
+        template: 'console.log("With tags");',
+        type: "javascript",
+        dependencies: [],
+        input: [],
+        tags: { version: "1.0.0" }};
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(sample, {}, options);
+
+      const tagsFile = output.items.find(
+        (item) => item.fileName === "tags.yaml",
+      );
+      expect(tagsFile).toBeDefined();
+      expect(tagsFile!.content).toBe("version: 1.0.0");
+    });
+
+    it("should generate tags.yaml with multiple tags", () => {
+      const sample: Sample = {
+        template: 'console.log("With multiple tags");',
+        type: "javascript",
+        dependencies: [],
+        input: [],
+        tags: { env: "production", version: "1.0.0", author: "dev" }};
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(sample, {}, options);
+
+      const tagsFile = output.items.find(
+        (item) => item.fileName === "tags.yaml",
+      );
+      expect(tagsFile).toBeDefined();
+      expect(tagsFile!.content).toBe(
+        "env: production\nversion: 1.0.0\nauthor: dev"
+      );
+    });
+
+    it("should not generate tags.yaml when no tags are provided", () => {
+      const sample: Sample = {
+        template: 'console.log("No tags");',
+        type: "javascript",
+        dependencies: [],
+        input: [],
+      };
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(sample, {}, options);
+
+      expect(
+        output.items.some((item) => item.fileName === "tags.yaml"),
+      ).toBe(false);
+    });
+  });
+
   describe("Language Helper Functions", () => {
     it("should handle C# helper functions", () => {
       const sample: Sample = {
