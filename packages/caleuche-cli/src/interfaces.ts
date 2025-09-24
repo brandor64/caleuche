@@ -21,6 +21,7 @@ type SampleVariantInput =
 interface SampleVariantConfig {
   output: string;
   input: SampleVariantInput | string;
+  tags?: Record<string, any>;
 }
 
 interface SampleDefinition {
