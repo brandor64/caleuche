@@ -43,6 +43,7 @@ export interface Sample {
   type: Language;
   dependencies: Dependency[];
   input: TemplateInput[];
+  tags?: Record<string, any>;
 }
 
 export interface CompileOptions {

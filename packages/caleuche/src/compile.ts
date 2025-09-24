@@ -1,4 +1,5 @@
 import _ from "lodash";
+import YAML from "yaml";
 import { CompileOptions, CompileOutput, Sample } from "./interfaces";
 import * as csharp from "./csharp";
 import * as go from "./go";
@@ -90,6 +91,15 @@ function generateProjectFile(sample: Sample) {
   };
 }
 
+function generateTagsFile(sample: Sample) {
+  const tags = sample.tags || {};
+  const content = YAML.stringify(tags);
+  return {
+    fileName: "tags.yaml",
+    content: content,
+  };
+}
+
 function getTargetFileName(sample: Sample): string {
   const language = sample.type;
   switch (language) {
@@ -119,6 +129,11 @@ export function compileSample(
   if (options.project) {
     const projectFile = generateProjectFile(sample);
     output.items.push(projectFile);
+  }
+
+  if (sample.tags) {
+    const tagsFile = generateTagsFile(sample);
+    output.items.push(tagsFile);
   }
 
   const inputObject = fillInputObject(sample, input);

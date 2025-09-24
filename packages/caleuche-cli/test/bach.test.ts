@@ -352,4 +352,54 @@ describe("batchCompile", () => {
       "console.log('2');",
     );
   });
+
+  it("should write sample tags file if defined", () => {
+    mockCompileSample.mockReturnValue({
+      items: [
+        { fileName: "file1.js", content: "console.log('1');" },
+        { fileName: "tags.yaml", content: "tag1: value1\ntag2: value2" }
+      ],
+    });
+    const batchFilePath = getPath("batch.yaml");
+    const batchFileContent = multiline`
+      variants:
+        - name: foo
+          input:
+            type: object
+            properties:
+              var2: value
+      samples:
+        - templatePath: sample.yaml
+          variants:
+            - output: out
+              input: foo
+              tags:
+                tag1: value1
+                tag2: value2
+    `;
+    fs.writeFileSync(batchFilePath, batchFileContent);
+    const sampleFilePath = getPath("sample.yaml");
+    const sampleContent = multiline`
+      template: sample.js.template
+      type: javascript
+      dependencies:
+      input:
+        - name: var
+          type: string
+          required: true
+    `;
+    fs.writeFileSync(sampleFilePath, sampleContent);
+    batchCompile(batchFilePath, {});
+    expect(fs.existsSync(getPath("out/file1.js"))).toBe(true);
+    expect(fs.readFileSync(getPath("out/file1.js"), "utf-8")).toBe(
+      "console.log('1');",
+    );
+    expect(fs.existsSync(getPath("out/tags.yaml"))).toBe(true);
+    expect(fs.readFileSync(getPath("out/tags.yaml"), "utf-8")).toBe(
+      multiline`
+        tag1: value1
+        tag2: value2
+      `,
+    );
+  });
 });

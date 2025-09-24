@@ -128,6 +128,10 @@ export function batchCompile(
         process.exit(1);
       }
 
+      if (variant.tags) {
+        sample.tags = variant.tags;
+      }
+
       const effectiveOutputPath = path.join(
         options?.outputDir || workingDirectory,
         variant.output,
