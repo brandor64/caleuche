@@ -6,7 +6,7 @@
   "description": "VS Code extension for Caleuche template files with syntax highlighting and sample preview.",
   "repository": "https://github.com/brandor64/caleuche",
   "license": "MIT",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -162,7 +162,7 @@
     "test": "echo \"No tests are defined\""
   },
   "dependencies": {
-    "@caleuche/core": "^0.3.0",
+    "@caleuche/core": "^0.4.0",
     "yaml": "^2.8.0"
   },
   "devDependencies": {

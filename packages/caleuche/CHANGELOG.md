@@ -1,5 +1,11 @@
 # @caleuche/core
 
+## 0.4.0
+
+### Minor Changes
+
+- 8b3f4d5: Add support for sample tags
+
 ## 0.3.0
 
 ### Minor Changes
