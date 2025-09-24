@@ -1,4 +1,5 @@
 import _ from "lodash";
+import YAML from "yaml";
 import { CompileOptions, CompileOutput, Sample } from "./interfaces";
 import * as csharp from "./csharp";
 import * as go from "./go";
@@ -92,9 +93,7 @@ function generateProjectFile(sample: Sample) {
 
 function generateTagsFile(sample: Sample) {
   const tags = sample.tags || {};
-  const content = Object.entries(tags)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join("\n");
+  const content = YAML.stringify(tags);
   return {
     fileName: "tags.yaml",
     content: content,
