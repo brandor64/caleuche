@@ -377,7 +377,7 @@ describe("compileSample", () => {
         (item) => item.fileName === "tags.yaml",
       );
       expect(tagsFile).toBeDefined();
-      expect(tagsFile!.content).toBe("version: 1.0.0");
+      expect(tagsFile!.content).toBe("version: 1.0.0\n");
     });
 
     it("should generate tags.yaml with multiple tags", () => {
@@ -395,7 +395,7 @@ describe("compileSample", () => {
       );
       expect(tagsFile).toBeDefined();
       expect(tagsFile!.content).toBe(
-        "env: production\nversion: 1.0.0\nauthor: dev"
+        "env: production\nversion: 1.0.0\nauthor: dev\n"
       );
     });
 
