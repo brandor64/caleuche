@@ -1,5 +1,16 @@
 # @caleuche/cli
 
+## 0.5.0
+
+### Minor Changes
+
+- 8b3f4d5: Add support for sample tags
+
+### Patch Changes
+
+- Updated dependencies [8b3f4d5]
+  - @caleuche/core@0.4.0
+
 ## 0.4.1
 
 ### Patch Changes
