@@ -55,7 +55,7 @@ samples:
   - templatePath: ./project-templates/Sample.cs.template
     variants:
       - output: ./out-dev/
-        input: dev           # Shorthand for reference
+        input: dev # Shorthand for reference
       - output: ./out-prod/
         input:
           type: object

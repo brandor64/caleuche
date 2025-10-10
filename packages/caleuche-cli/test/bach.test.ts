@@ -357,7 +357,7 @@ describe("batchCompile", () => {
     mockCompileSample.mockReturnValue({
       items: [
         { fileName: "file1.js", content: "console.log('1');" },
-        { fileName: "tags.yaml", content: "tag1: value1\ntag2: value2" }
+        { fileName: "tags.yaml", content: "tag1: value1\ntag2: value2" },
       ],
     });
     const batchFilePath = getPath("batch.yaml");

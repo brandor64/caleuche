@@ -369,7 +369,8 @@ describe("compileSample", () => {
         type: "javascript",
         dependencies: [],
         input: [],
-        tags: { version: "1.0.0" }};
+        tags: { version: "1.0.0" },
+      };
       const options: CompileOptions = { project: false };
       const output: CompileOutput = compileSample(sample, {}, options);
 
@@ -386,7 +387,8 @@ describe("compileSample", () => {
         type: "javascript",
         dependencies: [],
         input: [],
-        tags: { env: "production", version: "1.0.0", author: "dev" }};
+        tags: { env: "production", version: "1.0.0", author: "dev" },
+      };
       const options: CompileOptions = { project: false };
       const output: CompileOutput = compileSample(sample, {}, options);
 
@@ -395,7 +397,7 @@ describe("compileSample", () => {
       );
       expect(tagsFile).toBeDefined();
       expect(tagsFile!.content).toBe(
-        "env: production\nversion: 1.0.0\nauthor: dev\n"
+        "env: production\nversion: 1.0.0\nauthor: dev\n",
       );
     });
 
@@ -409,9 +411,9 @@ describe("compileSample", () => {
       const options: CompileOptions = { project: false };
       const output: CompileOutput = compileSample(sample, {}, options);
 
-      expect(
-        output.items.some((item) => item.fileName === "tags.yaml"),
-      ).toBe(false);
+      expect(output.items.some((item) => item.fileName === "tags.yaml")).toBe(
+        false,
+      );
     });
   });
 
