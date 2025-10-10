@@ -38,6 +38,7 @@ export function compileAndWriteOutput(
     try {
       return compileSample(sample, input, {
         project: options.project || false,
+        generateTest: !!sample.testInput,
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -59,6 +60,17 @@ export function compileAndWriteOutput(
     for (const { fileName, content } of output.items) {
       const itemOutputPath = path.join(outputPath, fileName);
       fs.writeFileSync(itemOutputPath, content);
+    }
+
+    // Write test outputs to /test subdirectory if available
+    if (output.testItems && output.testItems.length > 0) {
+      const testOutputPath = path.join(outputPath, "test");
+      createOutputDirectory(testOutputPath);
+
+      for (const { fileName, content } of output.testItems) {
+        const itemOutputPath = path.join(testOutputPath, fileName);
+        fs.writeFileSync(itemOutputPath, content);
+      }
     }
   } catch {
     console.error(`Failed to write output to ${outputPath}`);

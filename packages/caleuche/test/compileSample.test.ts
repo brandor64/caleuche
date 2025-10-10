@@ -742,4 +742,232 @@ describe("compileSample", () => {
       );
     });
   });
+
+  describe("Test Input Generation", () => {
+    it("should not generate test items when generateTest is false", () => {
+      const sample: Sample = {
+        template: 'console.log("Hello, <%= name %>!");',
+        type: "javascript",
+        dependencies: [],
+        input: [{ name: "name", type: "string", required: true }],
+        testInput: { name: "TestWorld" },
+      };
+      const options: CompileOptions = { project: false, generateTest: false };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "World" },
+        options,
+      );
+
+      expect(output.testItems).toBeUndefined();
+      expect(output.items).toHaveLength(1);
+      const sampleFile = output.items.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(sampleFile!.content).toBe('console.log("Hello, World!");');
+    });
+
+    it("should not generate test items when testInput is not provided", () => {
+      const sample: Sample = {
+        template: 'console.log("Hello, <%= name %>!");',
+        type: "javascript",
+        dependencies: [],
+        input: [{ name: "name", type: "string", required: true }],
+      };
+      const options: CompileOptions = { project: false, generateTest: true };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "World" },
+        options,
+      );
+
+      expect(output.testItems).toBeUndefined();
+      expect(output.items).toHaveLength(1);
+    });
+
+    it("should generate test items with testInput overriding regular input", () => {
+      const sample: Sample = {
+        template: 'console.log("Hello, <%= name %>!");',
+        type: "javascript",
+        dependencies: [],
+        input: [{ name: "name", type: "string", required: true }],
+        testInput: { name: "TestWorld" },
+      };
+      const options: CompileOptions = { project: false, generateTest: true };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "World" },
+        options,
+      );
+
+      expect(output.items).toHaveLength(1);
+      expect(output.testItems).toHaveLength(1);
+
+      const sampleFile = output.items.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(sampleFile!.content).toBe('console.log("Hello, World!");');
+
+      const testSampleFile = output.testItems!.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(testSampleFile!.content).toBe('console.log("Hello, TestWorld!");');
+    });
+
+    it("should generate test items with partial testInput override", () => {
+      const sample: Sample = {
+        template: 'console.log("Name: <%= name %>, Port: <%= port %>");',
+        type: "javascript",
+        dependencies: [],
+        input: [
+          { name: "name", type: "string", required: true },
+          { name: "port", type: "number", required: false, default: 3000 },
+        ],
+        testInput: { port: 8080 },
+      };
+      const options: CompileOptions = { project: false, generateTest: true };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "MyApp" },
+        options,
+      );
+
+      expect(output.items).toHaveLength(1);
+      expect(output.testItems).toHaveLength(1);
+
+      const sampleFile = output.items.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(sampleFile!.content).toBe('console.log("Name: MyApp, Port: 3000");');
+
+      const testSampleFile = output.testItems!.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(testSampleFile!.content).toBe('console.log("Name: MyApp, Port: 8080");');
+    });
+
+    it("should generate test items with project files when project option is true", () => {
+      const sample: Sample = {
+        template: 'console.log("Hello, <%= name %>!");',
+        type: "javascript",
+        dependencies: [{ name: "express", version: "^4.18.0" }],
+        input: [{ name: "name", type: "string", required: true }],
+        testInput: { name: "TestWorld" },
+      };
+      const options: CompileOptions = { project: true, generateTest: true };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "World" },
+        options,
+      );
+
+      expect(output.items).toHaveLength(2);
+      expect(output.testItems).toHaveLength(2);
+
+      expect(
+        output.items.some((item) => item.fileName === "package.json"),
+      ).toBe(true);
+      expect(
+        output.items.some((item) => item.fileName === "sample.js"),
+      ).toBe(true);
+
+      expect(
+        output.testItems!.some((item) => item.fileName === "package.json"),
+      ).toBe(true);
+      expect(
+        output.testItems!.some((item) => item.fileName === "sample.js"),
+      ).toBe(true);
+    });
+
+    it("should generate test items with tags when tags are present", () => {
+      const sample: Sample = {
+        template: 'console.log("Hello, <%= name %>!");',
+        type: "javascript",
+        dependencies: [],
+        input: [{ name: "name", type: "string", required: true }],
+        tags: { version: "1.0.0" },
+        testInput: { name: "TestWorld" },
+      };
+      const options: CompileOptions = { project: false, generateTest: true };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "World" },
+        options,
+      );
+
+      expect(output.items).toHaveLength(2);
+      expect(output.testItems).toHaveLength(2);
+
+      expect(
+        output.items.some((item) => item.fileName === "tags.yaml"),
+      ).toBe(true);
+      expect(
+        output.testItems!.some((item) => item.fileName === "tags.yaml"),
+      ).toBe(true);
+    });
+
+    it("should handle complex testInput with objects and arrays", () => {
+      const sample: Sample = {
+        template: multiline`
+          const config = {
+            name: "<%= name %>",
+            features: <%= JSON.stringify(features) %>,
+            settings: <%= JSON.stringify(settings) %>
+          };
+          console.log(config);`,
+        type: "javascript",
+        dependencies: [],
+        input: [
+          { name: "name", type: "string", required: true },
+          {
+            name: "features",
+            type: "array",
+            itemsType: "string",
+            required: false,
+            default: ["auth"],
+          },
+          {
+            name: "settings",
+            type: "object",
+            required: false,
+            default: { debug: false },
+          },
+        ],
+        testInput: {
+          features: ["auth", "logging"],
+          settings: { debug: true, verbose: true },
+        },
+      };
+      const options: CompileOptions = { project: false, generateTest: true };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "MyApp" },
+        options,
+      );
+
+      const sampleFile = output.items.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(sampleFile!.content).toBe(multiline`
+          const config = {
+            name: "MyApp",
+            features: ["auth"],
+            settings: {"debug":false}
+          };
+          console.log(config);
+      `);
+
+      const testSampleFile = output.testItems!.find(
+        (item) => item.fileName === "sample.js",
+      );
+      expect(testSampleFile!.content).toBe(multiline`
+          const config = {
+            name: "MyApp",
+            features: ["auth","logging"],
+            settings: {"debug":true,"verbose":true}
+          };
+          console.log(config);
+      `);
+    });
+  });
 });

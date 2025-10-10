@@ -29,6 +29,13 @@ function fillInputObject(
   return inputObject;
 }
 
+function mergeTestInput(
+  inputData: Record<string, any>,
+  testInput: Record<string, any>,
+): Record<string, any> {
+  return { ...inputData, ...testInput };
+}
+
 const regex = /[ \t]*(<%(?!=)[^%]+%>)\r?\n/g;
 
 function preprocessTemplate(template: string): string {
@@ -154,5 +161,28 @@ export function compileSample(
     fileName: targetFileName,
     content: outputFileContent,
   });
+
+  // Generate test samples if testInput is provided and generateTest is enabled
+  if (options.generateTest && sample.testInput) {
+    output.testItems = [];
+    
+    if (options.project) {
+      const projectFile = generateProjectFile(sample);
+      output.testItems.push(projectFile);
+    }
+
+    if (sample.tags) {
+      const tagsFile = generateTagsFile(sample);
+      output.testItems.push(tagsFile);
+    }
+
+    const testInputObject = fillInputObject(sample, mergeTestInput(input, sample.testInput));
+    const testOutputFileContent = compiledTemplate(testInputObject);
+    output.testItems.push({
+      fileName: targetFileName,
+      content: testOutputFileContent,
+    });
+  }
+
   return output;
 }

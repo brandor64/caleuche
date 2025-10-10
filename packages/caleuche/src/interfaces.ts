@@ -44,14 +44,20 @@ export interface Sample {
   dependencies: Dependency[];
   input: TemplateInput[];
   tags?: Record<string, any>;
+  testInput?: Record<string, any>;
 }
 
 export interface CompileOptions {
   project: boolean;
+  generateTest?: boolean;
 }
 
 export interface CompileOutput {
   items: Array<{
+    fileName: string;
+    content: string;
+  }>;
+  testItems?: Array<{
     fileName: string;
     content: string;
   }>;

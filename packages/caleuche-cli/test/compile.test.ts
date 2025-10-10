@@ -219,7 +219,7 @@ describe("compile", () => {
       expect(mockCompileSample).toHaveBeenCalledWith(
         { ...mockSample, template: "resolved template" },
         mockData,
-        { project: true },
+        { project: true, generateTest: false },
       );
     });
 
@@ -250,7 +250,7 @@ describe("compile", () => {
       expect(mockCompileSample).toHaveBeenCalledWith(
         { ...mockSample, template: "resolved template" },
         mockData,
-        { project: false },
+        { project: false, generateTest: false },
       );
     });
   });
