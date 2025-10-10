@@ -1,5 +1,13 @@
 # @caleuche/cli
 
+## 0.5.1
+
+### Patch Changes
+
+- 012e4e0: Documentation improvements for spec and usage
+- Updated dependencies [012e4e0]
+  - @caleuche/core@0.4.1
+
 ## 0.5.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @caleuche/core
 
+## 0.4.1
+
+### Patch Changes
+
+- 012e4e0: Documentation improvements for spec and usage
+
 ## 0.4.0
 
 ### Minor Changes
