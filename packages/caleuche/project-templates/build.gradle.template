@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'sample'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+<% _.forEach(dependencies, function(dependency) { %>
+    implementation '<%= dependency.name %>:<%= dependency.version %>'
+<% }); %>
+}
+
+/* keep the generated Sample.java visible to Gradle,
+   mirroring build-helper-maven-plugin in the POM */
+sourceSets {
+    main {
+        java {
+            srcDir '.'
+        }
+    }
+}
