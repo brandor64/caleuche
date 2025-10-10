@@ -91,6 +91,53 @@ name: Alice
 che compile ./my-sample ./data.yaml ./output
 ```
 
+### 3. Sample with Test Input for Testable Samples
+
+When a sample includes `testInput`, Caleuche automatically generates a testable version of the sample in a `/test` subdirectory within the output directory. The test version uses values from `testInput` to override the regular input values.
+
+**sample.yaml**
+
+```yaml
+template: |
+  console.log("API Endpoint: <%= endpoint %>, Port: <%= port %>");
+type: javascript
+dependencies: []
+input:
+  - name: endpoint
+    type: string
+    required: true
+  - name: port
+    type: number
+    required: false
+    default: 3000
+testInput:
+  endpoint: https://test.example.com
+  port: 8080
+```
+
+**data.yaml**
+
+```yaml
+endpoint: https://api.example.com
+```
+
+**Command:**
+
+```sh
+che compile ./my-sample ./data.yaml ./output
+```
+
+**Output structure:**
+
+```
+output/
+  sample.js          # Contains: console.log("API Endpoint: https://api.example.com, Port: 3000");
+  test/
+    sample.js        # Contains: console.log("API Endpoint: https://test.example.com, Port: 8080");
+```
+
+The test sample inherits all input values from the regular input and overrides only the values specified in `testInput`. This allows you to create testable versions of samples with different configurations (e.g., test endpoints, mock data) without duplicating the entire sample definition.
+
 ## Sample and Data File Structure
 
 - **Sample file**: YAML describing the sample, including the template (inline or file reference), language, dependencies, and input fields.

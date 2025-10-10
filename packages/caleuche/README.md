@@ -18,6 +18,7 @@ The library acts as the core engine for tools like the Caleuche CLI, providing a
   - Primitives: `string`, `number`, `boolean`
   - Complex types: `object`, `array` (with typed items)
   - Required/optional fields with default values
+- **Test Sample Generation**: Automatically generate testable versions of samples with different input values using `testInput`
 - **Template Helper Functions**: Built-in language-specific helpers for common code generation tasks:
   - Import/using statement generation
   - Environment variable handling with runtime validation
@@ -143,6 +144,44 @@ const sample: Sample = {
 const output = compileSample(sample, { name: "World" }, { project: false });
 // Output includes tags.yaml file with metadata
 ```
+
+### Generating Testable Samples
+
+Caleuche supports generating testable versions of samples alongside the regular output. This is useful when you want to create samples that can be validated with different input values without modifying the primary sample:
+
+```ts
+const sample: Sample = {
+  template: 'console.log("API Endpoint: <%= endpoint %>, Port: <%= port %>");',
+  type: "javascript",
+  dependencies: [],
+  input: [
+    { name: "endpoint", type: "string", required: true },
+    { name: "port", type: "number", required: false, default: 3000 }
+  ],
+  testInput: {
+    endpoint: "https://test.example.com",
+    port: 8080
+  }
+};
+
+const output = compileSample(
+  sample, 
+  { endpoint: "https://api.example.com" }, 
+  { project: false, generateTest: true }
+);
+
+// output.items contains the regular sample:
+// - sample.js with "API Endpoint: https://api.example.com, Port: 3000"
+
+// output.testItems contains the test version:
+// - sample.js with "API Endpoint: https://test.example.com, Port: 8080"
+```
+
+**Key behaviors:**
+- `testInput` values override the regular input values for test sample generation
+- Input values not specified in `testInput` are inherited from the regular input
+- Test samples are only generated when both `testInput` is defined and `generateTest: true` is set
+- When using the CLI, test samples are automatically written to a `/test` subdirectory
 
 ### Template Built-ins
 
@@ -284,13 +323,15 @@ interface Sample {
   dependencies: Dependency[];    // Package dependencies
   input: TemplateInput[];        // Template input definitions
   tags?: Record<string, any>;    // Optional metadata tags
+  testInput?: Record<string, any>; // Optional test input overrides
 }
 ```
 
 **`CompileOptions`**
 ```ts
 interface CompileOptions {
-  project: boolean;  // If true, generates language-specific project file
+  project: boolean;       // If true, generates language-specific project file
+  generateTest?: boolean; // If true and testInput exists, generates test samples
 }
 ```
 
@@ -300,6 +341,10 @@ interface CompileOutput {
   items: Array<{
     fileName: string;  // Generated file name
     content: string;   // File content
+  }>;
+  testItems?: Array<{ // Test samples (only when generateTest=true and testInput exists)
+    fileName: string;
+    content: string;
   }>;
 }
 ```
