@@ -41,7 +41,7 @@ che compile <sample-path> <data-file> <output-directory> [options]
 
 - Main code file with compiled template (e.g., `sample.py`, `sample.js`, `Sample.java`, etc.)
 - Project file with dependencies (when `-p` flag is used)
-- `tags.yaml` metadata file (if tags are defined in the sample)
+- `tags.yaml` metadata file (if tags are defined in the input data)
 
 ### Batch Command
 
