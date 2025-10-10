@@ -1,135 +1,147 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 function escapeHtml(text: string): string {
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function escapeAttribute(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export class TemplateInputViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = 'caleucheTemplateInputs';
+  public static readonly viewType = "caleucheTemplateInputs";
 
-    private _view?: vscode.WebviewView;
-    private _inputs: any[] = [];
-    private _currentValues: Record<string, any> = {};
-    private _onInputChange?: (inputs: Record<string, any>) => void;
+  private _view?: vscode.WebviewView;
+  private _inputs: any[] = [];
+  private _currentValues: Record<string, any> = {};
+  private _onInputChange?: (inputs: Record<string, any>) => void;
 
-    constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(private readonly _extensionUri: vscode.Uri) {}
 
-    public resolveWebviewView(
-        webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
-        _token: vscode.CancellationToken,
-    ) {
-        this._view = webviewView;
+  public resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    context: vscode.WebviewViewResolveContext,
+    _token: vscode.CancellationToken,
+  ) {
+    this._view = webviewView;
 
-        webviewView.webview.options = {
-            enableScripts: true,
-            localResourceRoots: [this._extensionUri]
-        };
+    webviewView.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [this._extensionUri],
+    };
 
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage(
-            message => {
-                if (message.type === 'inputChange') {
-                    this._handleInputChange(message.name, message.value);
-                }
-            }
-        );
+    webviewView.webview.onDidReceiveMessage((message) => {
+      if (message.type === "inputChange") {
+        this._handleInputChange(message.name, message.value);
+      }
+    });
+  }
+
+  public setInputs(
+    inputs: any[],
+    onChange: (inputs: Record<string, any>) => void,
+  ) {
+    this._inputs = inputs;
+    this._onInputChange = onChange;
+
+    this._currentValues = {};
+    inputs.forEach((input) => {
+      this._currentValues[input.name] =
+        input.default ?? this._getDefaultValue(input.type);
+    });
+
+    this._updateWebview();
+
+    if (this._onInputChange) {
+      this._onInputChange(this._currentValues);
+    }
+  }
+
+  public clear() {
+    this._inputs = [];
+    this._currentValues = {};
+    this._updateWebview();
+  }
+
+  private _handleInputChange(name: string, value: any) {
+    const input = this._inputs.find((i) => i.name === name);
+    if (!input) {
+      return;
     }
 
-    public setInputs(inputs: any[], onChange: (inputs: Record<string, any>) => void) {
-        this._inputs = inputs;
-        this._onInputChange = onChange;
+    let parsedValue = value;
 
-        this._currentValues = {};
-        inputs.forEach(input => {
-            this._currentValues[input.name] = input.default ?? this._getDefaultValue(input.type);
-        });
-
-        this._updateWebview();
-
-        if (this._onInputChange) {
-            this._onInputChange(this._currentValues);
-        }
+    try {
+      switch (input.type) {
+        case "number":
+          parsedValue = value === "" ? "" : Number(value);
+          break;
+        case "boolean":
+          parsedValue = Boolean(value);
+          break;
+        case "array":
+          parsedValue = value
+            ? value
+                .split(",")
+                .map((v: string) => v.trim())
+                .filter((v: string) => v)
+            : [];
+          break;
+        case "object":
+          parsedValue = value ? JSON.parse(value) : {};
+          break;
+        default:
+          parsedValue = value;
+      }
+    } catch (error) {
+      console.warn("Failed to parse input value:", error);
+      return;
     }
 
-    public clear() {
-        this._inputs = [];
-        this._currentValues = {};
-        this._updateWebview();
+    this._currentValues[name] = parsedValue;
+
+    console.log("Input changed:", name, "to:", parsedValue);
+    console.log("All current values:", this._currentValues);
+
+    if (this._onInputChange) {
+      this._onInputChange(this._currentValues);
     }
+  }
 
-    private _handleInputChange(name: string, value: any) {
-        const input = this._inputs.find(i => i.name === name);
-        if (!input) {
-            return;
-        }
-
-        let parsedValue = value;
-
-        try {
-            switch (input.type) {
-                case 'number':
-                    parsedValue = value === '' ? '' : Number(value);
-                    break;
-                case 'boolean':
-                    parsedValue = Boolean(value);
-                    break;
-                case 'array':
-                    parsedValue = value ? value.split(',').map((v: string) => v.trim()).filter((v: string) => v) : [];
-                    break;
-                case 'object':
-                    parsedValue = value ? JSON.parse(value) : {};
-                    break;
-                default:
-                    parsedValue = value;
-            }
-        } catch (error) {
-            console.warn('Failed to parse input value:', error);
-            return;
-        }
-
-        this._currentValues[name] = parsedValue;
-
-        console.log('Input changed:', name, 'to:', parsedValue);
-        console.log('All current values:', this._currentValues);
-
-        if (this._onInputChange) {
-            this._onInputChange(this._currentValues);
-        }
+  private _updateWebview() {
+    if (this._view) {
+      this._view.webview.html = this._getHtmlForWebview(this._view.webview);
     }
+  }
 
-    private _updateWebview() {
-        if (this._view) {
-            this._view.webview.html = this._getHtmlForWebview(this._view.webview);
-        }
+  private _getDefaultValue(type: string): any {
+    switch (type) {
+      case "number":
+        return 0;
+      case "boolean":
+        return false;
+      case "array":
+        return [];
+      case "object":
+        return {};
+      default:
+        return "";
     }
+  }
 
-    private _getDefaultValue(type: string): any {
-        switch (type) {
-            case 'number': return 0;
-            case 'boolean': return false;
-            case 'array': return [];
-            case 'object': return {};
-            default: return '';
-        }
-    }
-
-    private _getHtmlForWebview(webview: vscode.Webview): string {
-        if (this._inputs.length === 0) {
-            return `<!DOCTYPE html>
+  private _getHtmlForWebview(webview: vscode.Webview): string {
+    if (this._inputs.length === 0) {
+      return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -159,11 +171,13 @@ export class TemplateInputViewProvider implements vscode.WebviewViewProvider {
     </div>
 </body>
 </html>`;
-        }
+    }
 
-        const inputsHtml = this._inputs.map(input => this._generateInputHtml(input)).join('');
+    const inputsHtml = this._inputs
+      .map((input) => this._generateInputHtml(input))
+      .join("");
 
-        return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -281,72 +295,78 @@ export class TemplateInputViewProvider implements vscode.WebviewViewProvider {
     </script>
 </body>
 </html>`;
-    }
+  }
 
-    private _generateInputHtml(input: any): string {
-        const name = escapeAttribute(input.name);
-        const label = escapeHtml(input.name);
-        const description = input.description ? escapeHtml(input.description) : '';
-        const required = input.required ? 'required' : '';
-        const requiredClass = input.required ? 'required' : '';
-        const currentValue = this._currentValues[input.name] ?? input.default ?? this._getDefaultValue(input.type);
-        const inputType = input.type || 'string';
+  private _generateInputHtml(input: any): string {
+    const name = escapeAttribute(input.name);
+    const label = escapeHtml(input.name);
+    const description = input.description ? escapeHtml(input.description) : "";
+    const required = input.required ? "required" : "";
+    const requiredClass = input.required ? "required" : "";
+    const currentValue =
+      this._currentValues[input.name] ??
+      input.default ??
+      this._getDefaultValue(input.type);
+    const inputType = input.type || "string";
 
-        switch (inputType) {
-            case 'boolean':
-                const checked = Boolean(currentValue) ? 'checked' : '';
-                return `
+    switch (inputType) {
+      case "boolean":
+        const checked = Boolean(currentValue) ? "checked" : "";
+        return `
                     <div class="input-group">
                         <div class="checkbox-container">
                             <input type="checkbox" name="${name}" data-input-type="boolean" ${checked} ${required}>
                             <label class="input-label ${requiredClass}" for="${name}">${label}</label>
                             <span class="input-type">(boolean)</span>
                         </div>
-                        ${description ? `<div class="input-description">${description}</div>` : ''}
+                        ${description ? `<div class="input-description">${description}</div>` : ""}
                     </div>
                 `;
 
-            case 'number':
-                const numValue = escapeAttribute(String(currentValue || ''));
-                return `
+      case "number":
+        const numValue = escapeAttribute(String(currentValue || ""));
+        return `
                     <div class="input-group">
                         <label class="input-label ${requiredClass}">${label} <span class="input-type">(number)</span></label>
-                        ${description ? `<div class="input-description">${description}</div>` : ''}
+                        ${description ? `<div class="input-description">${description}</div>` : ""}
                         <input type="number" name="${name}" data-input-type="number" value="${numValue}" ${required}>
                     </div>
                 `;
 
-            case 'array':
-                const arrayValue = Array.isArray(currentValue) ? escapeAttribute(currentValue.join(', ')) : '';
-                return `
+      case "array":
+        const arrayValue = Array.isArray(currentValue)
+          ? escapeAttribute(currentValue.join(", "))
+          : "";
+        return `
                     <div class="input-group">
                         <label class="input-label ${requiredClass}">${label} <span class="input-type">(array)</span></label>
-                        ${description ? `<div class="input-description">${description}</div>` : ''}
+                        ${description ? `<div class="input-description">${description}</div>` : ""}
                         <input type="text" name="${name}" data-input-type="array" value="${arrayValue}" placeholder="value1, value2, value3" ${required}>
                     </div>
                 `;
 
-            case 'object':
-                const objectValue = typeof currentValue === 'object' && currentValue !== null
-                    ? escapeHtml(JSON.stringify(currentValue, null, 2))
-                    : '';
-                return `
+      case "object":
+        const objectValue =
+          typeof currentValue === "object" && currentValue !== null
+            ? escapeHtml(JSON.stringify(currentValue, null, 2))
+            : "";
+        return `
                     <div class="input-group">
                         <label class="input-label ${requiredClass}">${label} <span class="input-type">(object)</span></label>
-                        ${description ? `<div class="input-description">${description}</div>` : ''}
+                        ${description ? `<div class="input-description">${description}</div>` : ""}
                         <textarea name="${name}" data-input-type="object" placeholder="{}" ${required}>${objectValue}</textarea>
                     </div>
                 `;
 
-            default:
-                const stringValue = escapeAttribute(String(currentValue || ''));
-                return `
+      default:
+        const stringValue = escapeAttribute(String(currentValue || ""));
+        return `
                     <div class="input-group">
                         <label class="input-label ${requiredClass}">${label} <span class="input-type">(string)</span></label>
-                        ${description ? `<div class="input-description">${description}</div>` : ''}
+                        ${description ? `<div class="input-description">${description}</div>` : ""}
                         <input type="text" name="${name}" data-input-type="string" value="${stringValue}" ${required}>
                     </div>
                 `;
-        }
     }
+  }
 }

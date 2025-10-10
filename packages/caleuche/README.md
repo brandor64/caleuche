@@ -73,28 +73,30 @@ const config = {
 };
   `,
   type: "javascript",
-  dependencies: [
-    { name: "express", version: "^4.18.0" }
-  ],
+  dependencies: [{ name: "express", version: "^4.18.0" }],
   input: [
     { name: "name", type: "string", required: true },
     { name: "port", type: "number", required: false, default: 3000 },
     { name: "debug", type: "boolean", required: false, default: false },
-    { 
-      name: "features", 
-      type: "array", 
-      itemsType: "string", 
-      required: false, 
-      default: ["logging"] 
-    }
-  ]
+    {
+      name: "features",
+      type: "array",
+      itemsType: "string",
+      required: false,
+      default: ["logging"],
+    },
+  ],
 };
 
-const output = compileSample(sample, { 
-  name: "MyApp",
-  port: 8080,
-  features: ["auth", "logging", "metrics"]
-}, { project: true });
+const output = compileSample(
+  sample,
+  {
+    name: "MyApp",
+    port: 8080,
+    features: ["auth", "logging", "metrics"],
+  },
+  { project: true },
+);
 ```
 
 ### Using Template Helpers
@@ -118,8 +120,13 @@ func main() {
   dependencies: [],
   input: [
     { name: "useEnv", type: "boolean", required: true },
-    { name: "hardcodedKey", type: "string", required: false, default: "default-key" }
-  ]
+    {
+      name: "hardcodedKey",
+      type: "string",
+      required: false,
+      default: "default-key",
+    },
+  ],
 };
 ```
 
@@ -136,8 +143,8 @@ const sample: Sample = {
   tags: {
     category: "basic",
     difficulty: "beginner",
-    version: "1.0.0"
-  }
+    version: "1.0.0",
+  },
 };
 
 const output = compileSample(sample, { name: "World" }, { project: false });
@@ -153,16 +160,17 @@ Template helper functions are available within templates to generate language-sp
 Available for all supported languages:
 
 - **`<language>.valueOrEnvironment(useEnvironmentVariable, variableName, environmentVariable, value, indentationLevel?)`**
-  
+
   Generates code to assign a variable either from an environment variable at runtime (with validation) or from a provided static value.
-  
+
   - `useEnvironmentVariable` (boolean): If true, generates code to read from environment variable
   - `variableName` (string): Name of the variable to create
   - `environmentVariable` (string): Name of the environment variable to read from
   - `value` (string, optional): Static value to use if not reading from environment
   - `indentationLevel` (number, optional): Indentation level for generated code (default varies by language)
-  
+
   **Example:**
+
   ```ts
   // In a Go template:
   <%- go.valueOrEnvironment(true, "apiKey", "API_KEY") %>
@@ -179,19 +187,20 @@ Available for all supported languages:
 **Go**
 
 - **`go.includes(...items)`**
-  
+
   Generates Go import statements with automatic grouping (standard library vs. external packages).
-  
+
   - `items`: Rest parameter accepting strings or objects with `{ module: string, condition?: boolean }`
-  
+
   **Example:**
+
   ```ts
   <%- go.includes("fmt", "os", { module: "github.com/joho/godotenv", condition: needsDotenv }) %>
   // Generates:
   // import (
   //     "fmt"
   //     "os"
-  //     
+  //
   //     "github.com/joho/godotenv"
   // )
   ```
@@ -199,12 +208,13 @@ Available for all supported languages:
 **C#**
 
 - **`csharp.usings(...items)`**
-  
+
   Generates C# using statements.
-  
+
   - `items`: Rest parameter accepting strings or objects with `{ namespace: string, condition?: boolean }`
-  
+
   **Example:**
+
   ```ts
   <%- csharp.usings("System", "System.IO", { namespace: "System.Net.Http", condition: needsHttp }) %>
   // Generates:
@@ -222,11 +232,13 @@ These languages have the `valueOrEnvironment` helper available but no additional
 ### Types
 
 **`Language`**
+
 ```ts
-type Language = "csharp" | "java" | "python" | "go" | "javascript"
+type Language = "csharp" | "java" | "python" | "go" | "javascript";
 ```
 
 **`Dependency`**
+
 ```ts
 interface Dependency {
   name: string;
@@ -279,27 +291,29 @@ Describes a code sample with its template, language, dependencies, inputs, and o
 
 ```ts
 interface Sample {
-  template: string;              // EJS-style template string
-  type: Language;                // Target language
-  dependencies: Dependency[];    // Package dependencies
-  input: TemplateInput[];        // Template input definitions
-  tags?: Record<string, any>;    // Optional metadata tags
+  template: string; // EJS-style template string
+  type: Language; // Target language
+  dependencies: Dependency[]; // Package dependencies
+  input: TemplateInput[]; // Template input definitions
+  tags?: Record<string, any>; // Optional metadata tags
 }
 ```
 
 **`CompileOptions`**
+
 ```ts
 interface CompileOptions {
-  project: boolean;  // If true, generates language-specific project file
+  project: boolean; // If true, generates language-specific project file
 }
 ```
 
 **`CompileOutput`**
+
 ```ts
 interface CompileOutput {
   items: Array<{
-    fileName: string;  // Generated file name
-    content: string;   // File content
+    fileName: string; // Generated file name
+    content: string; // File content
   }>;
 }
 ```
@@ -316,16 +330,17 @@ Compiles a code sample template with provided input data and returns generated f
 - **Returns**: Object containing array of generated files with names and content
 
 **Example:**
+
 ```ts
 const output = compileSample(
   {
     template: 'console.log("<%= message %>");',
     type: "javascript",
     dependencies: [],
-    input: [{ name: "message", type: "string", required: true }]
+    input: [{ name: "message", type: "string", required: true }],
   },
   { message: "Hello World" },
-  { project: false }
+  { project: false },
 );
 
 // output.items[0].fileName === "sample.js"
