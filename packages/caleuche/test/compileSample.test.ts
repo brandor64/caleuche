@@ -47,6 +47,29 @@ describe("compileSample", () => {
       ).toBe(true);
     });
 
+    it("should generate a SH file with the correct content", () => {
+      const sample: Sample = {
+        template: 'echo "Hello, <%= name %>!"',
+        type: "shell",
+        dependencies: [],
+        input: [{ name: "name", type: "string", required: true }],
+      };
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(
+        sample,
+        { name: "World" },
+        options,
+      );
+      expect(output.items.some((item) => item.fileName === "sample.sh")).toBe(
+        true,
+      );
+      expect(
+        output.items.some((item) =>
+          item.content.includes('echo "Hello, World!"'),
+        ),
+      ).toBe(true);
+    });
+
     it("should generate correct file names for all supported languages", () => {
       const languages = [
         "javascript",
@@ -54,6 +77,7 @@ describe("compileSample", () => {
         "csharp",
         "java",
         "go",
+        "shell",
       ] as const;
       const expectedFileNames = [
         "sample.js",
@@ -61,6 +85,7 @@ describe("compileSample", () => {
         "Sample.cs",
         "Sample.java",
         "sample.go",
+        "sample.sh",
       ];
 
       languages.forEach((language, index) => {

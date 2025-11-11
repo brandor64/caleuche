@@ -1,4 +1,4 @@
-export type Language = "csharp" | "java" | "python" | "go" | "javascript";
+export type Language = "csharp" | "java" | "python" | "go" | "javascript" | "shell";
 
 export interface Dependency {
   name: string;
