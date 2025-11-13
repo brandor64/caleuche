@@ -1,5 +1,11 @@
 # @caleuche/core
 
+## 0.5.0
+
+### Minor Changes
+
+- 6a2095f: Add .sh support
+
 ## 0.4.1
 
 ### Patch Changes
