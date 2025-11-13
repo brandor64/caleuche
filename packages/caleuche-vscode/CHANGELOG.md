@@ -1,5 +1,12 @@
 # caleuche-vscode
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies [6a2095f]
+  - @caleuche/core@0.5.0
+
 ## 0.0.6
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @caleuche/cli
 
+## 0.5.2
+
+### Patch Changes
+
+- 6a2095f: Add .sh support
+- Updated dependencies [6a2095f]
+  - @caleuche/core@0.5.0
+
 ## 0.5.1
 
 ### Patch Changes
