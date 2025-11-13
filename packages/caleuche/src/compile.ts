@@ -72,6 +72,10 @@ function getProjectFileTemplate(sample: Sample): {
         targetFileName: `requirements.txt`,
         template: preprocessTemplate(requirementsTxt),
       };
+    case "shell":
+      throw new Error(
+        `Shell language does not support project file generation.`,
+      );
     default:
       throw new Error(
         `Unsupported language: ${language}. Cannot generate project file.`,
@@ -113,6 +117,8 @@ function getTargetFileName(sample: Sample): string {
       return "Sample.java";
     case "python":
       return "sample.py";
+    case "shell":
+      return "sample.sh";
     default:
       throw new Error(
         `Unsupported language: ${language}. Cannot generate sample file.`,

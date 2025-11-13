@@ -143,7 +143,7 @@ export function batchCompile(
           resolvedVariant.properties,
           effectiveOutputPath,
           {
-            project: true,
+            project: sample.dependencies && sample.dependencies.length > 0,
           },
         )
       ) {
