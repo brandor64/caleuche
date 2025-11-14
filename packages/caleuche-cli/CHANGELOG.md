@@ -1,5 +1,11 @@
 # @caleuche/cli
 
+## 0.5.3
+
+### Patch Changes
+
+- 74be2c4: Fix bug with tagging variants
+
 ## 0.5.2
 
 ### Patch Changes
