@@ -1,5 +1,11 @@
 # @caleuche/core
 
+## 0.5.1
+
+### Patch Changes
+
+- 564a5c3: Add optional versioning for python requirements.txt
+
 ## 0.5.0
 
 ### Minor Changes
