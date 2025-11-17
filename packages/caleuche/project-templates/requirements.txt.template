@@ -1,4 +1,5 @@
 <% _.forEach(dependencies, function(dependency) { %>
 <%= dependency.name %><% if (dependency.version) { %>==<%= dependency.version %>
 <% } %>
+
 <% }) %>
