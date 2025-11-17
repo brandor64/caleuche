@@ -1,5 +1,11 @@
 # @caleuche/core
 
+## 0.5.2
+
+### Patch Changes
+
+- 80b8307: bugfix for requirements.txt generation
+
 ## 0.5.1
 
 ### Patch Changes
