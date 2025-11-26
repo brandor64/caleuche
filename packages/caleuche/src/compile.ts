@@ -1,11 +1,13 @@
 import _ from "lodash";
 import YAML from "yaml";
-import { CompileOptions, CompileOutput, Sample } from "./interfaces";
+import { CompileOptions, CompileOutput, Sample, TestOverrides } from "./interfaces";
 import * as csharp from "./csharp";
 import * as go from "./go";
 import * as python from "./python";
 import * as java from "./java";
 import * as javascript from "./javascript";
+
+const TEST_SUBFOLDER = "test";
 
 function fillInputObject(
   sample: Sample,
@@ -160,5 +162,41 @@ export function compileSample(
     fileName: targetFileName,
     content: outputFileContent,
   });
+
+  if (sample.testOverrides) {
+    const testOutput = generateTestSample(
+      sample,
+      input,
+      sample.testOverrides,
+      compiledTemplate,
+      targetFileName,
+    );
+    output.items.push(...testOutput);
+  }
+
   return output;
+}
+
+function generateTestSample(
+  sample: Sample,
+  parentInput: Record<string, any>,
+  testOverrides: TestOverrides,
+  compiledTemplate: _.TemplateExecutor,
+  targetFileName: string,
+): Array<{ fileName: string; content: string }> {
+  const testItems: Array<{ fileName: string; content: string }> = [];
+
+  // Merge parent input with test overrides
+  const testInputObject = fillInputObject(sample, {
+    ...parentInput,
+    ...testOverrides.input,
+  });
+
+  const testOutputContent = compiledTemplate(testInputObject);
+  testItems.push({
+    fileName: `${TEST_SUBFOLDER}/${targetFileName}`,
+    content: testOutputContent,
+  });
+
+  return testItems;
 }
