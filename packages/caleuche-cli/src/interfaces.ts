@@ -18,10 +18,15 @@ type SampleVariantInput =
   | SampleVariantInputReference
   | SampleVariantInputPath;
 
+interface TestOverrides {
+  input: Record<string, any>;
+}
+
 interface SampleVariantConfig {
   output: string;
   input: SampleVariantInput | string;
   tags?: Record<string, any>;
+  testOverrides?: TestOverrides;
 }
 
 interface SampleDefinition {
