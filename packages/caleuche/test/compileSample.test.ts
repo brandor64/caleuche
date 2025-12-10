@@ -769,4 +769,156 @@ describe("compileSample", () => {
       );
     });
   });
+
+  describe("Test Overrides", () => {
+    it("should generate test sample in test subfolder when testOverrides is provided", () => {
+      const sample: Sample = {
+        template: 'console.log("Endpoint: <%= endpoint %>");',
+        type: "javascript",
+        dependencies: [],
+        input: [{ name: "endpoint", type: "string", required: true }],
+        testOverrides: {
+          input: { endpoint: "https://test-endpoint.com" },
+        },
+      };
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(
+        sample,
+        { endpoint: "https://placeholder-endpoint.com" },
+        options,
+      );
+
+      expect(output.items.length).toBe(2);
+      expect(output.items.some((item) => item.fileName === "sample.js")).toBe(
+        true,
+      );
+      expect(
+        output.items.some((item) => item.fileName === "test/sample.js"),
+      ).toBe(true);
+    });
+
+    it("should use parent input values for test sample when not overridden", () => {
+      const sample: Sample = {
+        template:
+          'console.log("Endpoint: <%= endpoint %>, Model: <%= model %>");',
+        type: "javascript",
+        dependencies: [],
+        input: [
+          { name: "endpoint", type: "string", required: true },
+          { name: "model", type: "string", required: true },
+        ],
+        testOverrides: {
+          input: { endpoint: "https://test-endpoint.com" },
+        },
+      };
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(
+        sample,
+        { endpoint: "https://placeholder-endpoint.com", model: "gpt-4" },
+        options,
+      );
+
+      const mainSample = output.items.find(
+        (item) => item.fileName === "sample.js",
+      );
+      const testSample = output.items.find(
+        (item) => item.fileName === "test/sample.js",
+      );
+
+      // Main sample uses original values
+      expect(mainSample!.content).toBe(
+        'console.log("Endpoint: https://placeholder-endpoint.com, Model: gpt-4");',
+      );
+      // Test sample uses overridden endpoint but keeps parent model
+      expect(testSample!.content).toBe(
+        'console.log("Endpoint: https://test-endpoint.com, Model: gpt-4");',
+      );
+    });
+
+    it("should override multiple input values in test sample", () => {
+      const sample: Sample = {
+        template:
+          'console.log("Endpoint: <%= endpoint %>, Model: <%= model %>, Timeout: <%= timeout %>");',
+        type: "javascript",
+        dependencies: [],
+        input: [
+          { name: "endpoint", type: "string", required: true },
+          { name: "model", type: "string", required: true },
+          { name: "timeout", type: "number", required: false, default: 30 },
+        ],
+        testOverrides: {
+          input: {
+            endpoint: "https://test-endpoint.com",
+            model: "test-model",
+          },
+        },
+      };
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(
+        sample,
+        { endpoint: "https://placeholder-endpoint.com", model: "gpt-4" },
+        options,
+      );
+
+      const testSample = output.items.find(
+        (item) => item.fileName === "test/sample.js",
+      );
+
+      expect(testSample!.content).toBe(
+        'console.log("Endpoint: https://test-endpoint.com, Model: test-model, Timeout: 30");',
+      );
+    });
+
+    it("should not generate test subfolder when testOverrides is not provided", () => {
+      const sample: Sample = {
+        template: 'console.log("Hello");',
+        type: "javascript",
+        dependencies: [],
+        input: [],
+      };
+      const options: CompileOptions = { project: false };
+      const output: CompileOutput = compileSample(sample, {}, options);
+
+      expect(output.items.length).toBe(1);
+      expect(
+        output.items.some((item) => item.fileName.startsWith("test/")),
+      ).toBe(false);
+    });
+
+    it("should generate correct test file names for all supported languages", () => {
+      const languages = [
+        "javascript",
+        "python",
+        "csharp",
+        "java",
+        "go",
+      ] as const;
+      const expectedTestFileNames = [
+        "test/sample.js",
+        "test/sample.py",
+        "test/Sample.cs",
+        "test/Sample.java",
+        "test/sample.go",
+      ];
+
+      languages.forEach((language, index) => {
+        const sample: Sample = {
+          template: 'console.log("Hello");',
+          type: language,
+          dependencies: [],
+          input: [],
+          testOverrides: {
+            input: {},
+          },
+        };
+        const options: CompileOptions = { project: false };
+        const output: CompileOutput = compileSample(sample, {}, options);
+
+        const testFile = output.items.find((item) =>
+          item.fileName.startsWith("test/"),
+        );
+        expect(testFile!.fileName).toBe(expectedTestFileNames[index]);
+      });
+    });
+  });
 });

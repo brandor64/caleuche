@@ -402,4 +402,267 @@ describe("batchCompile", () => {
       `,
     );
   });
+
+  describe("testOverrides", () => {
+    it("should exit if --test-overrides JSON is invalid", () => {
+      const batchFilePath = getPath("batch.yaml");
+      const batchFileContent = multiline`
+        samples:
+          - templatePath: sample.yaml
+            variants:
+              - output: out
+                input:
+                  type: object
+                  properties:
+                    var: value
+      `;
+      fs.writeFileSync(batchFilePath, batchFileContent);
+      const sampleFilePath = getPath("sample.yaml");
+      const sampleContent = multiline`
+        template: sample.js.template
+        type: javascript
+        dependencies:
+        input:
+          - name: var
+            type: string
+            required: true
+      `;
+      fs.writeFileSync(sampleFilePath, sampleContent);
+
+      expect(() => {
+        batchCompile(batchFilePath, { testOverrides: "invalid json" });
+      }).toThrow("process.exit");
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        "Failed to parse --test-overrides JSON: invalid json",
+      );
+      expect(mockExit).toHaveBeenCalledWith(1);
+    });
+
+    it("should pass command-level testOverrides to sample", () => {
+      mockCompileSample.mockReturnValue({
+        items: [{ fileName: "sample.js", content: "code" }],
+      });
+      const batchFilePath = getPath("batch.yaml");
+      const batchFileContent = multiline`
+        samples:
+          - templatePath: sample.yaml
+            variants:
+              - output: out
+                input:
+                  type: object
+                  properties:
+                    var: value
+      `;
+      fs.writeFileSync(batchFilePath, batchFileContent);
+      const sampleFilePath = getPath("sample.yaml");
+      const sampleContent = multiline`
+        template: sample.js.template
+        type: javascript
+        dependencies:
+        input:
+          - name: var
+            type: string
+            required: true
+      `;
+      fs.writeFileSync(sampleFilePath, sampleContent);
+
+      batchCompile(batchFilePath, {
+        testOverrides: '{"endpoint": "https://test.com"}',
+      });
+
+      expect(mockCompileSample).toHaveBeenCalledWith(
+        expect.objectContaining({
+          testOverrides: { input: { endpoint: "https://test.com" } },
+        }),
+        expect.any(Object),
+        expect.any(Object),
+      );
+    });
+
+    it("should pass variant-level testOverrides to sample", () => {
+      mockCompileSample.mockReturnValue({
+        items: [{ fileName: "sample.js", content: "code" }],
+      });
+      const batchFilePath = getPath("batch.yaml");
+      const batchFileContent = multiline`
+        samples:
+          - templatePath: sample.yaml
+            variants:
+              - output: out
+                input:
+                  type: object
+                  properties:
+                    var: value
+                testOverrides:
+                  input:
+                    endpoint: https://variant-test.com
+      `;
+      fs.writeFileSync(batchFilePath, batchFileContent);
+      const sampleFilePath = getPath("sample.yaml");
+      const sampleContent = multiline`
+        template: sample.js.template
+        type: javascript
+        dependencies:
+        input:
+          - name: var
+            type: string
+            required: true
+      `;
+      fs.writeFileSync(sampleFilePath, sampleContent);
+
+      batchCompile(batchFilePath, {});
+
+      expect(mockCompileSample).toHaveBeenCalledWith(
+        expect.objectContaining({
+          testOverrides: { input: { endpoint: "https://variant-test.com" } },
+        }),
+        expect.any(Object),
+        expect.any(Object),
+      );
+    });
+
+    it("should merge testOverrides with variant-level taking precedence over command-level", () => {
+      mockCompileSample.mockReturnValue({
+        items: [{ fileName: "sample.js", content: "code" }],
+      });
+      const batchFilePath = getPath("batch.yaml");
+      const batchFileContent = multiline`
+        samples:
+          - templatePath: sample.yaml
+            variants:
+              - output: out
+                input:
+                  type: object
+                  properties:
+                    var: value
+                testOverrides:
+                  input:
+                    endpoint: https://variant-wins.com
+                    variantOnly: true
+      `;
+      fs.writeFileSync(batchFilePath, batchFileContent);
+      const sampleFilePath = getPath("sample.yaml");
+      const sampleContent = multiline`
+        template: sample.js.template
+        type: javascript
+        dependencies:
+        input:
+          - name: var
+            type: string
+            required: true
+      `;
+      fs.writeFileSync(sampleFilePath, sampleContent);
+
+      batchCompile(batchFilePath, {
+        testOverrides: '{"endpoint": "https://command-level.com", "commandOnly": "value"}',
+      });
+
+      expect(mockCompileSample).toHaveBeenCalledWith(
+        expect.objectContaining({
+          testOverrides: {
+            input: {
+              endpoint: "https://variant-wins.com",
+              commandOnly: "value",
+              variantOnly: true,
+            },
+          },
+        }),
+        expect.any(Object),
+        expect.any(Object),
+      );
+    });
+
+    it("should merge testOverrides with sample-level in precedence chain", () => {
+      mockCompileSample.mockReturnValue({
+        items: [{ fileName: "sample.js", content: "code" }],
+      });
+      const batchFilePath = getPath("batch.yaml");
+      const batchFileContent = multiline`
+        samples:
+          - templatePath: sample.yaml
+            variants:
+              - output: out
+                input:
+                  type: object
+                  properties:
+                    var: value
+                testOverrides:
+                  input:
+                    variantKey: variantValue
+      `;
+      fs.writeFileSync(batchFilePath, batchFileContent);
+      const sampleFilePath = getPath("sample.yaml");
+      const sampleContent = multiline`
+        template: sample.js.template
+        type: javascript
+        dependencies:
+        input:
+          - name: var
+            type: string
+            required: true
+        testOverrides:
+          input:
+            sampleKey: sampleValue
+            variantKey: sampleShouldLose
+      `;
+      fs.writeFileSync(sampleFilePath, sampleContent);
+
+      batchCompile(batchFilePath, {
+        testOverrides: '{"commandKey": "commandValue", "sampleKey": "commandShouldLose"}',
+      });
+
+      expect(mockCompileSample).toHaveBeenCalledWith(
+        expect.objectContaining({
+          testOverrides: {
+            input: {
+              commandKey: "commandValue",
+              sampleKey: "sampleValue",
+              variantKey: "variantValue",
+            },
+          },
+        }),
+        expect.any(Object),
+        expect.any(Object),
+      );
+    });
+
+    it("should not set testOverrides when none are provided", () => {
+      mockCompileSample.mockReturnValue({
+        items: [{ fileName: "sample.js", content: "code" }],
+      });
+      const batchFilePath = getPath("batch.yaml");
+      const batchFileContent = multiline`
+        samples:
+          - templatePath: sample.yaml
+            variants:
+              - output: out
+                input:
+                  type: object
+                  properties:
+                    var: value
+      `;
+      fs.writeFileSync(batchFilePath, batchFileContent);
+      const sampleFilePath = getPath("sample.yaml");
+      const sampleContent = multiline`
+        template: sample.js.template
+        type: javascript
+        dependencies:
+        input:
+          - name: var
+            type: string
+            required: true
+      `;
+      fs.writeFileSync(sampleFilePath, sampleContent);
+
+      batchCompile(batchFilePath, {});
+
+      expect(mockCompileSample).toHaveBeenCalledWith(
+        expect.objectContaining({
+          testOverrides: undefined,
+        }),
+        expect.any(Object),
+        expect.any(Object),
+      );
+    });
+  });
 });
