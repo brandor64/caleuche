@@ -1,5 +1,11 @@
 # @caleuche/core
 
+## 0.6.0
+
+### Minor Changes
+
+- 2758d63: Add test override functionality
+
 ## 0.5.2
 
 ### Patch Changes
