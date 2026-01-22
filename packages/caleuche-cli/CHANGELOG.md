@@ -1,5 +1,16 @@
 # @caleuche/cli
 
+## 0.6.0
+
+### Minor Changes
+
+- 2758d63: Add test override functionality
+
+### Patch Changes
+
+- Updated dependencies [2758d63]
+  - @caleuche/core@0.6.0
+
 ## 0.5.3
 
 ### Patch Changes
