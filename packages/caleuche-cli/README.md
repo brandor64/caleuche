@@ -58,6 +58,7 @@ che batch <batch-file> [options]
 **Options:**
 
 - `-d, --output-dir <outputDir>`: Base output directory for all compiled samples (defaults to the batch file's directory)
+- `-t, --test-overrides <json>`: JSON string with test overrides to generate test samples in a `test/` subfolder (e.g., `'{"key": "value"}'`)
 
 The batch command is ideal for generating multiple variations of samples, such as producing the same template with development and production configurations, or creating examples across different scenarios.
 
@@ -532,6 +533,9 @@ samples:  # (required) List of templates to compile
           value: variant-name
         tags:  # (optional) Override or add tags for this variant
           key: value
+        testOverrides:  # (optional) Test overrides for this variant
+          input:
+            key: test-value
 ```
 
 **Fields:**
@@ -548,6 +552,7 @@ samples:  # (required) List of templates to compile
       - An object with `type: "path"` and `value` pointing to a data file
       - An object with `type: "reference"` and `value` naming a variant
     - `tags`: Optional metadata to add/override for this specific variant
+    - `testOverrides`: Optional test parameter overrides. When specified, a `test/` subfolder is generated with samples using overridden input values.
 
 **Input Types:**
 
@@ -576,6 +581,55 @@ After compilation, the output directory will contain:
    - Go: `go.mod`
 
 3. **Tags file** (when tags are defined): `tags.yaml` containing the metadata
+
+4. **Test subfolder** (when test overrides are defined): `test/` directory containing samples compiled with test-specific input overrides
+
+### Test Overrides
+
+Test overrides allow you to generate test variants of your samples with modified input values. This is useful for creating samples with test-specific configurations, mock endpoints, or test credentials.
+
+**Precedence (most specific wins):**
+1. Variant-level `testOverrides` (highest priority)
+2. Sample-level `testOverrides` (in sample.yaml)
+3. Command-level `--test-overrides` (lowest priority)
+
+Overrides are merged, so you can set base test values at the command level and override specific values at the variant level.
+
+**Example: Command-level test overrides**
+
+```bash
+che batch ./batch.yaml -t '{"endpoint": "https://test-api.example.com", "apiKey": "test-key"}'
+```
+
+This generates a `test/` subfolder for each sample with `endpoint` and `apiKey` overridden.
+
+**Example: Variant-level test overrides in batch.yaml**
+
+```yaml
+samples:
+  - templatePath: ./my-sample
+    variants:
+      - output: ./output/default
+        input:
+          type: object
+          properties:
+            endpoint: https://endpoint.com
+        testOverrides:
+          input:
+            endpoint: https://test-endpoint.com
+```
+
+**Output structure with test overrides:**
+
+```
+output/
+  default/
+    sample.py
+    requirements.txt
+    test/
+      sample.py         # Uses test endpoint and model
+      requirements.txt
+```
 
 ## License
 

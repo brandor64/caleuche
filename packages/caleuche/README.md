@@ -18,6 +18,7 @@ The library acts as the core engine for tools like the Caleuche CLI, providing a
   - Primitives: `string`, `number`, `boolean`
   - Complex types: `object`, `array` (with typed items)
   - Required/optional fields with default values
+- **Test Sample Generation**: Automatically generate test variants with overridden input values in a `test/` subfolder
 - **Template Helper Functions**: Built-in language-specific helpers for common code generation tasks:
   - Import/using statement generation
   - Environment variable handling with runtime validation
@@ -149,6 +150,45 @@ const sample: Sample = {
 
 const output = compileSample(sample, { name: "World" }, { project: false });
 // Output includes tags.yaml file with metadata
+```
+
+### Generating Test Samples with Test Overrides
+
+Use `testOverrides` to automatically generate a test variant of your sample in a `test/` subfolder. The test sample inherits all parent input values, with specified values overridden:
+
+```ts
+const sample: Sample = {
+  template: `
+const client = new OpenAI({ endpoint: "<%= endpoint %>" });
+const response = await client.chat.completions.create({
+  model: "<%= model %>",
+  messages: [{ role: "user", content: "Hello" }],
+});
+  `,
+  type: "javascript",
+  dependencies: [{ name: "openai", version: "^4.0.0" }],
+  input: [
+    { name: "endpoint", type: "string", required: true },
+    { name: "model", type: "string", required: true },
+  ],
+  testOverrides: {
+    input: {
+      endpoint: "https://test-endpoint.openai.azure.com",
+      model: "gpt-4-test",
+    },
+  },
+};
+
+const output = compileSample(
+  sample,
+  { endpoint: "https://display-endpoint.openai.com", model: "gpt-4" },
+  { project: true },
+);
+
+// Output includes:
+// - sample.js: Uses production endpoint and model
+// - package.json: Project dependencies
+// - test/sample.js: Uses test endpoint and model (overridden values)
 ```
 
 ### Template Built-ins
@@ -296,6 +336,17 @@ interface Sample {
   dependencies: Dependency[]; // Package dependencies
   input: TemplateInput[]; // Template input definitions
   tags?: Record<string, any>; // Optional metadata tags
+  testOverrides?: TestOverrides; // Optional test sample overrides
+}
+```
+
+**`TestOverrides`**
+
+Defines input value overrides for generating a test sample in a `test/` subfolder:
+
+```ts
+interface TestOverrides {
+  input: Record<string, any>; // Input values to override in test sample
 }
 ```
 

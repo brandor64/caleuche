@@ -38,12 +38,21 @@ export type TemplateInput =
       default?: Array<string | number | boolean | Record<string, any>>;
     };
 
+export interface TestOverrides {
+  /**
+   * Input value overrides for generating a test sample.
+   * These values will overwrite the parent sample's input values.
+   */
+  input: Record<string, any>;
+}
+
 export interface Sample {
   template: string;
   type: Language;
   dependencies: Dependency[];
   input: TemplateInput[];
   tags?: Record<string, any>;
+  testOverrides?: TestOverrides;
 }
 
 export interface CompileOptions {

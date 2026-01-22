@@ -54,10 +54,9 @@ export function compileAndWriteOutput(
   }
 
   try {
-    createOutputDirectory(outputPath);
-
     for (const { fileName, content } of output.items) {
       const itemOutputPath = path.join(outputPath, fileName);
+      createOutputDirectory(path.dirname(itemOutputPath));
       fs.writeFileSync(itemOutputPath, content);
     }
   } catch {

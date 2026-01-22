@@ -80,14 +80,48 @@ function resolveVariantDefinition(
   }
 }
 
+/**
+ * Resolves the effective testOverrides by merging with precedence:
+ * variant-level > sample-level > command-level
+ */
+function resolveTestOverrides(
+  commandLevelOverrides: Record<string, any> | undefined,
+  sampleLevelOverrides: { input: Record<string, any> } | undefined,
+  variantLevelOverrides: { input: Record<string, any> } | undefined,
+): { input: Record<string, any> } | undefined {
+  if (!commandLevelOverrides && !sampleLevelOverrides && !variantLevelOverrides) {
+    return undefined;
+  }
+
+  const mergedInput: Record<string, any> = {
+    ...(commandLevelOverrides || {}),
+    ...(sampleLevelOverrides?.input || {}),
+    ...(variantLevelOverrides?.input || {}),
+  };
+
+  return { input: mergedInput };
+}
+
 export function batchCompile(
   batchFile: string,
-  options: { outputDir?: string },
+  options:{ outputDir?: string; testOverrides?: string },
 ) {
   if (!isFile(batchFile)) {
     console.error(`Batch file "${batchFile}" does not exist or is not a file.`);
     process.exit(1);
   }
+
+  // Parse command-level test overrides if provided
+  let commandTestOverrides: Record<string, any> | undefined;
+  if (options.testOverrides) {
+    try {
+      commandTestOverrides = JSON.parse(options.testOverrides);
+    } catch (e) {
+      console.error(`Failed to parse --test-overrides JSON: ${options.testOverrides}`);
+      process.exit(1);
+    }
+  }
+
   const workingDirectory = getAbsoluteDirectoryPath(batchFile);
   console.log(`Working directory: ${workingDirectory}`);
   const batchDefinition = parse<BatchCompileDescription>(batchFile);
@@ -130,6 +164,12 @@ export function batchCompile(
 
       sample.tags = variant.tags;
 
+      sample.testOverrides = resolveTestOverrides(
+        commandTestOverrides,
+        sample.testOverrides,
+        variant.testOverrides,
+      );
+
       const effectiveOutputPath = path.join(
         options?.outputDir || workingDirectory,
         variant.output,
@@ -141,7 +181,7 @@ export function batchCompile(
           resolvedVariant.properties,
           effectiveOutputPath,
           {
-            project: sample.dependencies && sample.dependencies.length > 0,
+            project: (sample.dependencies?.length ?? 0) > 0,
           },
         )
       ) {

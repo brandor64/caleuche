@@ -37,6 +37,10 @@ program
     "-d, --output-dir <outputDir>",
     "Output directory for compiled samples",
   )
+  .option(
+    "-t, --test-overrides <json>",
+    'JSON string with test overrides, e.g. \'{"input": {"key": "value"}}\'',
+  )
   .action(batchCompile);
 
 program.parse();
