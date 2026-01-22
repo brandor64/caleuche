@@ -137,6 +137,13 @@ export function compileSample(
   if (options.project) {
     const projectFile = generateProjectFile(sample);
     output.items.push(projectFile);
+    
+    if (sample.testOverrides) {
+      output.items.push({
+        fileName: `${TEST_SUBFOLDER}/${projectFile.fileName}`,
+        content: projectFile.content,
+      });
+    }
   }
 
   if (sample.tags) {
